@@ -1,0 +1,49 @@
+This app is used by University of Wisconsin-Madison Physics to
+coordinate building usage during the COVID-19 dirsuption.
+
+The .htaccess file assumes that shibboleth is set up to authenticate
+people by NetID.  The code makes use of the shibboleth attributes cn
+and wiscEduMSOLPrimaryAddress (or if not available, mail).
+
+Download and install bootstrap into a directory named bootstrap (known
+to work with version 4.1.3).
+
+Copy config_example.php to config.php and edit it to match your
+situation.
+
+Copy approvals/ExampleDepartment.csv to
+approvals/YourDepartmentName.csv and edit.
+
+Copy roomcaps/ExampleBuilding.csv to roomcaps/YourBuildingName.csv and
+edit.
+
+Copy db_example.php to db.php and insert db access parameters.
+
+The following table should be created:
+
+CREATE TABLE `building_access` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `NETID` varchar(60) NOT NULL,
+  `NAME` varchar(120) NOT NULL,
+  `EMAIL` varchar(60) NOT NULL,
+  `PURPOSE` varchar(280) NOT NULL,
+  `BUILDING` varchar(20) NOT NULL,
+  `ROOM` varchar(60) NOT NULL,
+  `REQUESTED` datetime NOT NULL,
+  `START_TIME` datetime NOT NULL,
+  `END_TIME` datetime NOT NULL,
+  `APPROVED` char(1) NOT NULL,
+  `APPROVED_TIME` datetime DEFAULT NULL,
+  `APPROVED_BY` varchar(60) NOT NULL,
+  `ADMIN_REASON` varchar(60) NOT NULL,
+  `UPDATED` datetime NOT NULL,
+  `DEPARTMENT` varchar(10) NOT NULL,
+  `REPEAT_PARENT` int(11) NOT NULL,
+  `REPEAT_DAYS` varchar(7) NOT NULL,
+  `REPEAT_THROUGH` date DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `NETID` (`NETID`,`START_TIME`),
+  KEY `START_TIME` (`START_TIME`),
+  KEY `REPEAT_PARENT` (`REPEAT_PARENT`)
+) ENGINE=InnoDB AUTO_INCREMENT=6610 DEFAULT CHARSET=utf8
+
