@@ -29,6 +29,24 @@ function htmlescape($s) {
   return htmlspecialchars($s,ENT_QUOTES|ENT_HTML401);
 }
 
+function getWebUserName() {
+  if( array_key_exists("cn",$_SERVER) ) return $_SERVER["cn"];
+  if( array_key_exists("givenName",$_SERVER) && array_key_exists("sn",$_SERVER) ) {
+    return $_SERVER["givenName"] . " " . $_SERVER["sn"];
+  }
+  return $_SERVER["REMOTE_USER"];
+}
+
+function getWebUserEmail() {
+  if( array_key_exists("wiscEduMSOLPrimaryAddress",$_SERVER) ) {
+    return $_SERVER["wiscEduMSOLPrimaryAddress"];
+  }
+  if( array_key_exists("mail",$_SERVER) ) {
+    return strtolower($_SERVER["mail"]);
+  }
+  return $_SERVER["REMOTE_USER"] . "@wisc.edu";
+}
+
 function buildingAbbreviation($building) {
   if( array_key_exists($building,BUILDING_ABBREV) ) {
     return BUILDING_ABBREV[$building];

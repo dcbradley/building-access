@@ -142,8 +142,8 @@ function showNavbar($user,$show) {
             </li>
           <?php } ?>
         </ul>
-        <a class='btn btn-secondary' href='https://www.physics.wisc.edu/Shibboleth.sso/Logout?return=https://login.wisc.edu/logout'>Log Out</a>&nbsp;&nbsp;
-        <span class="navbar-text" style='color: rgb(255,0,255)'><?php echo htmlescape($_SERVER["cn"]) ?></span>&nbsp;
+        <a class='btn btn-secondary' href='https://<?php echo $_SERVER["SERVER_NAME"] ?>/Shibboleth.sso/Logout?return=https://login.wisc.edu/logout'>Log Out</a>&nbsp;&nbsp;
+        <span class="navbar-text" style='color: rgb(255,0,255)'><?php echo htmlescape(getWebUserName()) ?></span>&nbsp;
       </div>
     </nav>
 <?php
@@ -161,8 +161,8 @@ function saveRequest(&$show) {
     return;
   }
 
-  $cn = $_SERVER["cn"];
-  $email = $_SERVER["wiscEduMSOLPrimaryAddress"] ? $_SERVER["wiscEduMSOLPrimaryAddress"] : strtolower($_SERVER["mail"]);
+  $cn = getWebUserName();
+  $email = getWebUserEmail();
   $cur_day = $_REQUEST["day"];
 
   $start_time = $cur_day . " " . $_REQUEST["start_time"];
@@ -299,7 +299,7 @@ function saveRequest(&$show) {
     ";
     $stmt = $dbh->prepare($sql);
     $stmt->bindValue(":NETID",$web_user);
-    $stmt->bindValue(":NAME",$cn);
+    $stmt->bindValue(":NAME",getWebUserName());
     $stmt->bindValue(":EMAIL",$email);
     $approved = INITIALIZING_APPROVAL;
     $stmt->bindValue(":INITIALIZING_APPROVAL",$approved);
@@ -493,7 +493,7 @@ function saveRequest(&$show) {
       } else {
         echo "<div class='alert alert-warning'>Saved but <i>not</i> automatically approved.\n";
         foreach( $why_not_approved as $why_not ) {
-          echo htmlescape($why_not),"\n";
+          echo htmlescape($why_not),"<br>\n";
         }
         echo "<form action='$self_full_url' enctype='multipart/form-data' method='POST'>";
         echo "<input type='hidden' name='form' value='request_approval'/>\n";
@@ -737,9 +737,9 @@ function requestApproval(&$show) {
 
 function getUserDepartment() {
   global $web_user;
-  $cn = $_SERVER["cn"];
+  $cn = getWebUserName();
   list($first, $last) = explode(" ",$cn,2);
-  $email = $_SERVER["wiscEduMSOLPrimaryAddress"] ? $_SERVER["wiscEduMSOLPrimaryAddress"] : strtolower($_SERVER["mail"]);
+  $email = getWebUserEmail();
   $results = getLdapInfo($first,"",$last,$email,$web_user);
   $department = $results && isset($results["department"]) ? $results["department"] : '';
 
