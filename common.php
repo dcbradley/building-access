@@ -29,10 +29,26 @@ function htmlescape($s) {
   return htmlspecialchars($s,ENT_QUOTES|ENT_HTML401);
 }
 
+function fixNameCase($rawname) {
+  $names = explode(" ",$rawname);
+  $fixed_names = array();
+  foreach( $names as $part ) {
+    if( preg_match('{^[A-Z.-]*$}',$part) ) {
+      $part = ucfirst(strtolower($part));
+      $mcpos = strpos($part,"Mc");
+      if( $mcpos !== False ) {
+        $part = substr($part,0,$mcpos+2) . strtoupper(substr($part,$mcpos+2,1)) . substr($part,$mcpos+3);
+      }
+    }
+    $fixed_names[] = $part;
+  }
+  return implode(" ",$fixed_names);
+}
+
 function getWebUserName() {
-  if( array_key_exists("cn",$_SERVER) ) return $_SERVER["cn"];
+  if( array_key_exists("cn",$_SERVER) ) return fixNameCase($_SERVER["cn"]);
   if( array_key_exists("givenName",$_SERVER) && array_key_exists("sn",$_SERVER) ) {
-    return $_SERVER["givenName"] . " " . $_SERVER["sn"];
+    return fixNameCase($_SERVER["givenName"]) . " " . fixNameCase($_SERVER["sn"]);
   }
   return $_SERVER["REMOTE_USER"];
 }
