@@ -75,7 +75,7 @@ function buildingAbbreviation($building) {
 }
 
 function fileSafeName($unsafe) {
-  $result = preg_replace("{[^a-zA-Z1-9]}","",$unsafe);
+  $result = preg_replace("{[^a-zA-Z0-9]}","",$unsafe);
   return $result;
 }
 
