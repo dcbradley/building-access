@@ -15,10 +15,14 @@ Copy config_example.php to config.php and edit it to match your
 situation.
 
 Copy approvals/ExampleDepartment.csv to
-approvals/YourDepartmentName.csv and edit.
+approvals/YourDepartmentName.csv and edit.  The department name used
+for the csv file must match the department name in config.php with all
+characters but alphabetic and numeric stripped.
 
 Copy roomcaps/ExampleBuilding.csv to roomcaps/YourBuildingName.csv and
-edit.
+edit.  The building name used for the csv file must match the building
+name in config.php with all characters but alphabetic and numeric
+stripped.
 
 Copy db_example.php to db.php and insert db access parameters.
 
@@ -26,7 +30,7 @@ Example of how to set up the database:
 
 CREATE DATABASE building_access;
 
-GRANT ALL ON building_access.* TO building_access_user@hostname IDENTIFYED BY 'password here';
+GRANT ALL ON building_access.* TO building_access_user@hostname IDENTIFIED BY 'password here';
 
 USE building_access;
 
