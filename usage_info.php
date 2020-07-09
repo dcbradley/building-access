@@ -68,7 +68,7 @@ if( isset($_REQUEST['end_time']) && preg_match('{([0-9]+):([0-9]+)}',$_REQUEST['
   if( $max_hour < 24 ) $max_hour += 1; # include following hour
 }
 
-$sql = "SELECT COUNT(*) as NUM_PEOPLE, BUILDING FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND APPROVED NOT IN ('N','" . INITIALIZING_APPROVAL . "') {$building_sql} GROUP BY BUILDING ORDER BY BUILDING";
+$sql = "SELECT COUNT(DISTINCT NETID) as NUM_PEOPLE, BUILDING FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND APPROVED NOT IN ('N','" . INITIALIZING_APPROVAL . "') {$building_sql} GROUP BY BUILDING ORDER BY BUILDING";
 $count_in_building_stmt = $dbh->prepare($sql);
 if( $building_sql ) {
   $count_in_building_stmt->bindValue(":BUILDING",$_REQUEST["building"]);
