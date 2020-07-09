@@ -2,6 +2,9 @@
     font-size: 0.6rem;
     line-height: 0.7rem;
 }
+.slot-summary {
+    font-size: 0.6rem;
+}
 .pending_approval {
     color: #ff9900;
 }

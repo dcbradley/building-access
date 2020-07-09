@@ -11,6 +11,8 @@ if( !defined('ORGANIZE_RESERVATIONS_BY_FLOOR') || ORGANIZE_RESERVATIONS_BY_FLOOR
   $organize_reservations_by_floor = false;
 }
 
+$department = array_key_exists("department",$_REQUEST) ? $_REQUEST["department"] : "";
+
 function matchRoom($filter_room_regex,$rooms) {
   if( !$filter_room_regex || !count($rooms) ) {
     return true;
@@ -64,6 +66,12 @@ if( isset($_REQUEST['start_time']) && preg_match('{([0-9]+):([0-9]+)}',$_REQUEST
 if( isset($_REQUEST['end_time']) && preg_match('{([0-9]+):([0-9]+)}',$_REQUEST['end_time'],$match) ) {
   $max_hour = (int)$match[1];
   if( $max_hour < 24 ) $max_hour += 1; # include following hour
+}
+
+$sql = "SELECT COUNT(*) as NUM_PEOPLE, BUILDING FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND APPROVED NOT IN ('N','" . INITIALIZING_APPROVAL . "') {$building_sql} GROUP BY BUILDING ORDER BY BUILDING";
+$count_in_building_stmt = $dbh->prepare($sql);
+if( $building_sql ) {
+  $count_in_building_stmt->bindValue(":BUILDING",$_REQUEST["building"]);
 }
 
 $results = array();
@@ -140,28 +148,28 @@ for( $hour=0; $hour < 24; $hour++ ) {
       } else {
         $floors_done = array();
         foreach( $rooms as $room ) {
-	  $floor = getFloor($room);
-	  if( array_key_exists($floor,$floors_done) ) continue;
-	  $floors_done[$floor] = 1;
+          $floor = getFloor($room);
+          if( array_key_exists($floor,$floors_done) ) continue;
+          $floors_done[$floor] = 1;
 
           $this_floor_rooms = array();
           foreach( $rooms as $this_floor_room ) {
-	    if( getFloor($this_floor_room) != $floor ) continue;
-	    $this_floor_rooms[] = $this_floor_room;
-	  }
+            if( getFloor($this_floor_room) != $floor ) continue;
+            $this_floor_rooms[] = $this_floor_room;
+          }
 
           if( !matchRoom($filter_room_regex,$this_floor_rooms) ) continue;
-	  $this_floor_rooms = implode(",",$this_floor_rooms);
+          $this_floor_rooms = implode(",",$this_floor_rooms);
           $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . " " . $building . " " . $this_floor_rooms) . "</span> ";
 
-	  if( !array_key_exists($floor,$slotinfo_floor) ) {
-	    $slotinfo_floor[$floor] = array();
-	  }
-	  if( !array_key_exists($room,$slotinfo_floor[$floor]) ) {
-	    $slotinfo_floor[$floor][$room] = array();
-	  }
-	  $slotinfo_floor[$floor][$room][] = $this_slotinfo;
-	}
+          if( !array_key_exists($floor,$slotinfo_floor) ) {
+            $slotinfo_floor[$floor] = array();
+          }
+          if( !array_key_exists($room,$slotinfo_floor[$floor]) ) {
+            $slotinfo_floor[$floor][$room] = array();
+          }
+          $slotinfo_floor[$floor][$room][] = $this_slotinfo;
+        }
       }
     }
 
@@ -171,15 +179,29 @@ for( $hour=0; $hour < 24; $hour++ ) {
         $slotinfo .= "<div class='floor-usage-entry'>";
         uksort($floor,'compare_rooms');
         foreach( $floor as $room ) {
-	  foreach( $room as $this_slotinfo ) {
-	    $slotinfo .= $this_slotinfo;
-	  }
-	}
+          foreach( $room as $this_slotinfo ) {
+            $slotinfo .= $this_slotinfo;
+          }
+        }
         $slotinfo .= "</div>\n";
       }
     }
 
     $results[$vname] = $slotinfo;
+
+    $count_in_building_stmt->bindValue(":START_TIME",$start_time);
+    $count_in_building_stmt->bindValue(":END_TIME",$end_time);
+    $count_in_building_stmt->execute();
+
+    $building_counts = array();
+    while( ($row=$count_in_building_stmt->fetch()) ) {
+      $building_counts[] = $row["BUILDING"] . " occupants: " . $row["NUM_PEOPLE"];
+    }
+    $building_counts = implode(", ",$building_counts);
+    if( $building_counts ) {
+      $building_counts = "&nbsp;&nbsp;&nbsp; " . $building_counts;
+    }
+    $results[$vname . "-summary"] = $building_counts;
   }
 }
 echo json_encode($results);

@@ -821,7 +821,7 @@ function showRequestForm() {
     $default_department = getUserDepartment();
   }
   echo "<div class='field-input'>";
-  echo "<select name='department'>";
+  echo "<select name='department' id='department'>";
   echo "<option value=''>Choose your department</option>";
   foreach( DEPARTMENTS as $department ) {
     $selected = $default_department == $department ? "selected" : "";
@@ -943,7 +943,7 @@ function showRequestForm() {
     echo "<div class='row'>";
 
     $vname = "slot_{$hour}_0";
-    echo "<div id='{$vname}' class='col-sm'><nobr>{$hour12} {$ampm}</nobr>";
+    echo "<div id='{$vname}' class='col-sm'><nobr>{$hour12} {$ampm}</nobr> <span id='{$vname}-summary' class='slot-summary'></span>";
 
     echo "<div class='slotinfo'></div>";
     echo "</div>";
@@ -1018,6 +1018,10 @@ function showRequestForm() {
         url += "&start_time=" + encodeURIComponent(start_time);
         url += "&end_time=" + encodeURIComponent(end_time);
       }
+      var department = $('#department').val();
+      if( department ) {
+        url += "&department=" + encodeURIComponent(department);
+      }
       $.ajax({ url: url, success: function(data) {
         var slots = JSON.parse(data);
         $.each(slots,function (k,v) {
@@ -1029,11 +1033,16 @@ function showRequestForm() {
           } else {
             $(slot_e).show();
           }
-          $(slot_e).find('.slotinfo').html(v);
-          if( v ) {
-            $(slot_e).addClass("used_slot");
-          } else {
-            $(slot_e).removeClass("used_slot");
+          if( k.indexOf("-summary") > -1 ) {
+            $(slot_e).html(v);
+          }
+          else {
+            $(slot_e).find('.slotinfo').html(v);
+            if( v ) {
+              $(slot_e).addClass("used_slot");
+            } else {
+              $(slot_e).removeClass("used_slot");
+            }
           }
         });
       },
