@@ -88,3 +88,6 @@ function PARSE_ROOM_BUILDING($input_room,$department,&$room,&$building) {
 
 # max capacity per floor
 const BUILDING_FLOOR_MAX_CAP = null;
+
+# show checkbox for signing up as a safety monitor?
+const SAFETY_MONITOR_SIGNUP = false;

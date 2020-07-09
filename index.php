@@ -271,6 +271,7 @@ function saveRequest(&$show) {
         ROOM = :ROOM,
         START_TIME = :START_TIME,
         END_TIME = :END_TIME,
+        SAFETY_MONITOR = :SAFETY_MONITOR,
         REPEAT_DAYS = :REPEAT_DAYS,
         REPEAT_THROUGH = :REPEAT_THROUGH
       WHERE
@@ -293,6 +294,7 @@ function saveRequest(&$show) {
       ROOM = :ROOM,
       START_TIME = :START_TIME,
       END_TIME = :END_TIME,
+      SAFETY_MONITOR = :SAFETY_MONITOR,
       APPROVED = :INITIALIZING_APPROVAL,
       REPEAT_DAYS = :REPEAT_DAYS,
       REPEAT_THROUGH = :REPEAT_THROUGH
@@ -313,7 +315,12 @@ function saveRequest(&$show) {
   }
   $stmt->bindValue(":DEPARTMENT",$department);
 
-  $stmt->bindValue(":PURPOSE",$_REQUEST["purpose"]);
+  $safety_monitor = array_key_exists("safety_monitor",$_REQUEST) && $_REQUEST["safety_monitor"] ? 'Y' : '';
+  $stmt->bindValue(":SAFETY_MONITOR",$safety_monitor);
+
+  $purpose = $_REQUEST["purpose"];
+  if( !$purpose ) $purpose = "safety monitor";
+  $stmt->bindValue(":PURPOSE",$purpose);
 
   $room = $_REQUEST["room"];
 
@@ -832,6 +839,11 @@ function showRequestForm() {
   echo "<div class='field-title'><label for='purpose'>Purpose</label></div>\n";
   $value = $editing ? $editing["PURPOSE"] : "";
   echo "<div class='field-input'><input type='text' name='purpose' maxlength='280' value='",htmlescape($value),"'/></div>\n";
+
+  if( defined('SAFETY_MONITOR_SIGNUP') && SAFETY_MONITOR_SIGNUP ) {
+    $checked = $editing && array_key_exists("SAFETY_MONITOR",$editing) && $editing["SAFETY_MONITOR"] ? "checked" : "";
+    echo "<div class='field-input'><label><input type='checkbox' name='safety_monitor' value='1' $checked /> I will act as a safety monitor during this time</label></div>\n";
+  }
 
   echo "<div class='field-title'><label for='room'>Room(s)</label></div>\n";
   $value = $editing ? $editing["ROOM"] : "";
@@ -1389,6 +1401,9 @@ function downloadCSV() {
   $row[] = "Room";
   $row[] = "Building";
   $row[] = "Purpose";
+  if( defined('SAFETY_MONITOR_SIGNUP') && SAFETY_MONITOR_SIGNUP ) {
+    $row[] = "Safety Monitor";
+  }
   $row[] = "Submitted";
   $row[] = "Updated";
   $row[] = "Approved";
@@ -1406,6 +1421,9 @@ function downloadCSV() {
     $csv_row[] = $db_row['ROOM'];
     $csv_row[] = $db_row['BUILDING'];
     $csv_row[] = $db_row['PURPOSE'];
+    if( defined('SAFETY_MONITOR_SIGNUP') && SAFETY_MONITOR_SIGNUP ) {
+      $csv_row[] = $db_row['SAFETY_MONITOR'];
+    }
     $csv_row[] = $db_row['REQUESTED'];
     $csv_row[] = $db_row['UPDATED'] >= $db_row['REQUESTED'] ? $db_row['UPDATED'] : $db_row['REQUESTED'];
     $approved = $db_row["APPROVED"];
