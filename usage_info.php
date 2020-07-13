@@ -194,8 +194,13 @@ for( $hour=0; $hour < 24; $hour++ ) {
     $count_in_building_stmt->execute();
 
     $building_counts = array();
+    $total_count = 0;
     while( ($row=$count_in_building_stmt->fetch()) ) {
       $building_counts[] = $row["BUILDING"] . " occupants: " . $row["NUM_PEOPLE"];
+      $total_count += $row["NUM_PEOPLE"];
+    }
+    if( count($building_counts) && count(BUILDING_NAMES)>1 ) {
+      $building_counts[] = "<b>Total occupants: " . $total_count . "</b>";
     }
     $building_counts = implode(", ",$building_counts);
     if( $building_counts ) {
