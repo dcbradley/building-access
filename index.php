@@ -319,7 +319,6 @@ function saveRequest(&$show) {
   $stmt->bindValue(":SAFETY_MONITOR",$safety_monitor);
 
   $purpose = $_REQUEST["purpose"];
-  if( !$purpose ) $purpose = "safety monitor";
   $stmt->bindValue(":PURPOSE",$purpose);
 
   $room = $_REQUEST["room"];
