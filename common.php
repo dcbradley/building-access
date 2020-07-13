@@ -14,15 +14,16 @@ if( !isset($in_admin_mode) ) {
 }
 
 function isDeptAdmin() {
-  return getAdminDepartment() !== null;
+  return count(getAdminDepartments())>0;
 }
 
-function getAdminDepartment() {
+function getAdminDepartments() {
   global $web_user;
+  $result = array();
   foreach( DEPT_ADMINS as $department => $admins ) {
-    if( in_array($web_user,$admins) ) return $department;
+    if( in_array($web_user,$admins) ) $result[] = $department;
   }
-  return null;
+  return $result;
 }
 
 function htmlescape($s) {

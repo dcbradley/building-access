@@ -1084,13 +1084,21 @@ function showRequestForm() {
 function showPendingRequests() {
   global $sortcode;
 
-  $department = getAdminDepartment();
-  echo "<p>Showing requests pending manual approval for ",htmlescape($department),".</p>\n";
+  $departments = getAdminDepartments();
+  echo "<p>Showing requests pending manual approval for ",htmlescape(implode_and($departments)),".</p>\n";
+
+  $department_vars = array();
+  for( $i=0; $i<count($departments); $i++ ) {
+    $department_vars[] = ":DEPARTMENT$i";
+  }
+  $department_vars = implode(",",$department_vars);
 
   $dbh = connectDB();
-  $sql = "SELECT * FROM building_access WHERE APPROVED = :PENDING_APPROVAL AND START_TIME > DATE_SUB(now(),INTERVAL 1 DAY) AND (DEPARTMENT = :DEPARTMENT OR DEPARTMENT = '') ORDER BY START_TIME DESC";
+  $sql = "SELECT * FROM building_access WHERE APPROVED = :PENDING_APPROVAL AND START_TIME > DATE_SUB(now(),INTERVAL 1 DAY) AND (DEPARTMENT IN ($department_vars) OR DEPARTMENT = '') ORDER BY START_TIME DESC";
   $stmt = $dbh->prepare($sql);
-  $stmt->bindValue(":DEPARTMENT",$department);
+  for( $i=0; $i<count($departments); $i++ ) {
+    $stmt->bindValue(":DEPARTMENT$i",$departments[$i]);
+  }
   $stmt->bindValue(":PENDING_APPROVAL",PENDING_APPROVAL);
   $stmt->execute();
 
