@@ -126,6 +126,8 @@ function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
     $result = false;
   }
 
+  $people_already_counted = array($request["NAME"] => 1);
+
   $rooms = explode(", ",$request["ROOM"]);
   foreach( $rooms as $room ) {
     list($normcap,$maxcap,$description) = getRoomCap($room,$request['BUILDING']);
@@ -136,7 +138,7 @@ function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
     while( ($row=$overlap_stmt->fetch()) ) {
       $possible_overlaps[] = $row;
     }
-    $overlaps = getPeakOverlap($possible_overlaps,$request['START_TIME'],$request['END_TIME']);
+    $overlaps = getPeakOverlap($possible_overlaps,$request['START_TIME'],$request['END_TIME'],$people_already_counted);
     $peak_cap = 1 + count($overlaps);
     if( $peak_cap > $maxcap ) {
       $result = false;
@@ -186,6 +188,8 @@ function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
       $floors[] = $floor;
     }
   }
+  $people_already_counted = array($request["NAME"] => 1);
+
   foreach( $floors as $floor ) {
     $floorcap = getFloorCap($floor,$request['BUILDING']);
     if( !$floorcap ) continue;
@@ -197,7 +201,7 @@ function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
     while( ($row=$overlap_stmt->fetch()) ) {
       $possible_overlaps[] = $row;
     }
-    $overlaps = getPeakOverlap($possible_overlaps,$request['START_TIME'],$request['END_TIME']);
+    $overlaps = getPeakOverlap($possible_overlaps,$request['START_TIME'],$request['END_TIME'],$people_already_counted);
     $peak_cap = 1 + count($overlaps);
     if( $peak_cap > $maxcap ) {
       $result = false;
@@ -223,9 +227,13 @@ function conflictDesc($overlaps) {
   return "The other registration{$s_are} from " . $conflicts . ".";
 }
 
-function getPeakOverlap($possible_overlaps,$start_time,$end_time) {
+function getPeakOverlap($possible_overlaps,$start_time,$end_time,$people_already_counted) {
   $peak_overlaps = array();
   foreach( $possible_overlaps as &$overlap1 ) {
+    if( array_key_exists($overlap1["NAME"],$people_already_counted) ) {
+      continue;
+    }
+
     $start_time1 = max($start_time,$overlap1['START_TIME']);
     $end_time1 = min($end_time,$overlap1['END_TIME']);
     $other_possible_overlaps = array();
@@ -235,7 +243,9 @@ function getPeakOverlap($possible_overlaps,$start_time,$end_time) {
         $other_possible_overlaps[] = $overlap2;
       }
     }
-    $overlaps = getPeakOverlap($other_possible_overlaps,$start_time1,$end_time1);
+    $people_already_counted[$overlap1["NAME"]] = 1;
+    $overlaps = getPeakOverlap($other_possible_overlaps,$start_time1,$end_time1,$people_already_counted);
+    unset($people_already_counted[$overlap1["NAME"]]);
     if( count($overlaps)+1 > count($peak_overlaps) ) {
       $peak_overlaps = array($overlap1);
       foreach( $overlaps as $overlap ) {
