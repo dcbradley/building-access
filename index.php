@@ -11,8 +11,8 @@
    $self_full_url = "https://" . $_SERVER["SERVER_NAME"] . $self_path;
 
    $web_user = isset($_SERVER["REMOTE_USER"]) ? $_SERVER["REMOTE_USER"] : "";
-   $website_title = "Marauder’s Map";
-   $page_title = "Marauder’s Map";
+   $website_title = "Marauder’s Mapp";
+   $page_title = "Marauder’s Mapp";
 
    $show = isset($_REQUEST["s"]) ? $_REQUEST["s"] : "";
 
