@@ -135,6 +135,8 @@ function getDefaultBuilding($department) {
 function parseRoomBuildingList($str,$department) {
   $entries = explode(",",$str);
   $results = array();
+  $building_regex = getBuildingRegex();
+
   foreach( $entries as $entry ) {
     $entry = trim($entry);
     $room = "";
@@ -142,9 +144,19 @@ function parseRoomBuildingList($str,$department) {
     if( PARSE_ROOM_BUILDING($entry,$department,$room,$building) ) {
       $results[] = array(canonicalRoom($room),canonicalBuildingName($building));
     }
-    else if( preg_match("{^ *(.*) +([a-zA-Z]*) *$}",$entry,$match) ) {
+    else if( preg_match("{^(.*) +($building_regex)$}i",$entry,$match) ) {
       $room = canonicalRoom($match[1]);
       $building = canonicalBuildingName($match[2]);
+      $results[] = array($room,$building);
+    }
+    else if( ($building=getDefaultBuilding($department)) ) {
+      $room = canonicalRoom($entry);
+      $building = canonicalBuildingName($building);
+      $results[] = array($room,$building);
+    }
+    else {
+      $room = canonicalRoom($entry);
+      $building = "";
       $results[] = array($room,$building);
     }
   }

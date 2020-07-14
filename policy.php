@@ -50,7 +50,7 @@ function checkAutoApproval(&$why_not_approved,&$warnings,$id,&$request) {
       $room = canonicalRoom($room);
       $room_descr = $room . " " . buildingAbbreviation($request["BUILDING"]);
       foreach( $approval["ROOM"] as $room_building ) {
-        if( $room_building[0] == $room && $room_building[1] == $request["BUILDING"] ) {
+        if( $room_building[0] == $room && ($room_building[1] == $request["BUILDING"] || !$room_building[1]) ) {
           if( $approval["HOURS"] != "" ) {
             $hours_used = getHoursScheduled($request,$room);
             if( $hours_used > 1.0*$approval["HOURS"] ) {
