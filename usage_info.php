@@ -135,7 +135,11 @@ for( $hour=0; $hour < 24; $hour++ ) {
       $extra_info .= $purpose;
 
       $rooms = explode(", ",$row['ROOM']);
-      $building = buildingAbbreviation($row["BUILDING"]);
+      if( count(BUILDING_NAMES)>1 || count(BUILDING_NAMES)==1 && $row["BUILDING"] != BUILDING_NAMES[0] ) {
+        $building = buildingAbbreviation($row["BUILDING"]);
+      } else {
+        $building = "";
+      }
       if( $row["NETID"] == $web_user ) {
         $edit = "<a href='?id=" . htmlescape($row["ID"]) . "'><i class='far fa-edit'></i></a>";
       } else {
@@ -144,7 +148,7 @@ for( $hour=0; $hour < 24; $hour++ ) {
 
       if( !$organize_reservations_by_floor ) {
         if( !matchRoom($filter_room_regex,$rooms) ) continue;
-        $slotinfo .= "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . " " . $building . " " . $row["ROOM"]) . "</span> ";
+        $slotinfo .= "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . ": " . $building . " " . $row["ROOM"]) . "</span> ";
       } else {
         $floors_done = array();
         foreach( $rooms as $room ) {
@@ -160,7 +164,7 @@ for( $hour=0; $hour < 24; $hour++ ) {
 
           if( !matchRoom($filter_room_regex,$this_floor_rooms) ) continue;
           $this_floor_rooms = implode(",",$this_floor_rooms);
-          $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . " " . $building . " " . $this_floor_rooms) . "</span> ";
+          $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . ": " . $building . " " . $this_floor_rooms) . "</span> ";
 
           if( !array_key_exists($floor,$slotinfo_floor) ) {
             $slotinfo_floor[$floor] = array();
