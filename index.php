@@ -499,9 +499,9 @@ function saveRequest(&$show) {
       } else {
         echo "<div class='alert alert-warning'>Saved but <i>not</i> automatically approved.\n";
         foreach( $why_not_approved as $why_not ) {
-          echo htmlescape($why_not),"<br>\n";
+          echo "<br>",htmlescape($why_not),"\n";
         }
-        echo "<form action='$self_full_url' enctype='multipart/form-data' method='POST'>";
+        echo "<br><form action='$self_full_url' enctype='multipart/form-data' method='POST'>";
         echo "<input type='hidden' name='form' value='request_approval'/>\n";
         echo "<input type='hidden' name='id' value='",htmlescape($id),"'/>\n";
         echo "<input type='submit' value='Request Approval'/>\n";
