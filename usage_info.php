@@ -203,8 +203,13 @@ for( $hour=0; $hour < 24; $hour++ ) {
       $building_counts[] = $row["BUILDING"] . " occupants: " . $row["NUM_PEOPLE"];
       $total_count += $row["NUM_PEOPLE"];
     }
-    if( count($building_counts) && count(BUILDING_NAMES)>1 ) {
-      $building_counts[] = "<b>Total occupants: " . $total_count . "</b>";
+    if( $total_count ) {
+      $total_str = "<b>Total occupants: " . $total_count . "</b>";
+      if( count(BUILDING_NAMES)>1 ) {
+        $building_counts[] = $total_str;
+      } else {
+        $building_counts = array($total_str);
+      }
     }
     $building_counts = implode(", ",$building_counts);
     if( $building_counts ) {
