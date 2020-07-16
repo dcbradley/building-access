@@ -9,11 +9,6 @@
   require_once "approval.php";
   require_once "show_data.php";
 
-  $sortcode = "class=clicksort onClick='sortTable(this,this.cellIndex+1,1)'";
-  $self_path = str_replace("/index.php","/",$_SERVER["PHP_SELF"]);
-  $self_full_url = "https://" . $_SERVER["SERVER_NAME"] . $self_path;
-
-  $web_user = isset($_SERVER["REMOTE_USER"]) ? $_SERVER["REMOTE_USER"] : "";
   $website_title = "Marauder’s Mapp";
   $page_title = "Marauder’s Mapp";
 
@@ -83,7 +78,6 @@ function showNavbar($user,$show) {
   global $webapptop;
   global $page_title;
   global $default_building;
-  global $self_full_url;
   global $user_menu;
   global $admin_menu;
 

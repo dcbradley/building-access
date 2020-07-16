@@ -2,6 +2,12 @@
 
 require_once "config.php";
 
+$sortcode = "class=clicksort onClick='sortTable(this,this.cellIndex+1,1)'";
+$self_path = str_replace("/index.php","/",$_SERVER["PHP_SELF"]);
+$self_full_url = "https://" . $_SERVER["SERVER_NAME"] . $self_path;
+
+$web_user = isset($_SERVER["REMOTE_USER"]) ? $_SERVER["REMOTE_USER"] : "";
+
 const INITIALIZING_APPROVAL = 'I';
 const PENDING_APPROVAL = 'P';
 
@@ -539,7 +545,11 @@ class MenuEntry {
     $this->tag = $tag;
     $this->label = $label;
     if( !strpos($url,"://") ) {
-      $url = $self_full_url . $url;
+      $url_base = preg_replace('{^(.*)\?.*$}','$1',$self_full_url);
+      if( !preg_match('{/$}',$url_base) && !preg_match('{^/}',$url) ) {
+        $url_base .= '/';
+      }
+      $url = $url_base . $url;
     }
     $this->url = $url;
   }
