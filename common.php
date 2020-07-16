@@ -26,6 +26,25 @@ function getAdminDepartments() {
   return $result;
 }
 
+function getUserDepartment() {
+  global $web_user;
+  $cn = getWebUserName();
+  list($first, $last) = explode(" ",$cn,2);
+  $email = getWebUserEmail();
+  $results = getLdapInfo($first,"",$last,$email,$web_user);
+  $department = $results && isset($results["department"]) ? $results["department"] : '';
+
+  foreach( ALT_DEPARTMENT_NAMES as $alt_department => $alt_names ) {
+    foreach( $alt_names as $alt_name ) {
+      if( strcasecmp($alt_name,$department)==0 ) {
+        return $alt_department;
+      }
+    }
+  }
+
+  return $department;
+}
+
 function htmlescape($s) {
   return htmlspecialchars($s,ENT_QUOTES|ENT_HTML401);
 }
@@ -507,4 +526,83 @@ function implode_and($a) {
     $result .= $a[$i];
   }
   return $result;
+}
+
+class MenuEntry {
+  public $tag;
+  public $label;
+  public $url;
+
+  function __construct($tag,$label,$url) {
+    global $self_full_url;
+
+    $this->tag = $tag;
+    $this->label = $label;
+    if( !strpos($url,"://") ) {
+      $url = $self_full_url . $url;
+    }
+    $this->url = $url;
+  }
+};
+
+$user_menu = array();
+function addUserMenuEntry($entry) {
+  global $user_menu;
+  $user_menu[] = $entry;
+}
+
+$user_menu = array();
+function addAdminMenuEntry($entry) {
+  global $admin_menu;
+  $admin_menu[] = $entry;
+}
+
+class PageHandler {
+  public $tag;
+  public $handler_fn;
+  public $page_class;
+
+  function __construct($tag,$handler_fn,$page_class) {
+    $this->tag = $tag;
+    $this->handler_fn = $handler_fn;
+    $this->page_class = $page_class;
+  }
+};
+
+$page_handlers = array();
+function addPageHandler($entry) {
+  global $page_handlers;
+  $page_handlers[] = $entry;
+}
+
+class SubmitHandler {
+  public $tag;
+  public $handler_fn;
+
+  function __construct($tag,$handler_fn) {
+    $this->tag = $tag;
+    $this->handler_fn = $handler_fn;
+  }
+};
+
+$submit_handlers = array();
+function addSubmitHandler($entry) {
+  global $submit_handlers;
+  $submit_handlers[] = $entry;
+}
+
+class DownloadHandler {
+  public $tag;
+  public $handler_fn;
+
+  function __construct($tag,$handler_fn) {
+    $this->tag = $tag;
+    $this->handler_fn = $handler_fn;
+  }
+};
+
+$download_handlers = array();
+function addDownloadHandler($entry) {
+  global $download_handlers;
+  $download_handlers[] = $entry;
 }
