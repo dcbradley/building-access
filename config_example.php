@@ -112,6 +112,8 @@ const SAFETY_MONITOR_SIGNUP = false;
 const SAFETY_MONITOR_HOURS = array(
 );
 
+const SAFETY_MONITOR_PAGE_HEADER = "<p>Safety monitors are required for building use Mon-Thurs 5pm-10pm and Friday-Saturday 8am-5pm.</p>\n";
+
 # Optional function to get contact info for a person.
 # $info is an array containing the following keys: netid, name, email
 # An additional key, 'url' defaults to the wisc.edu search page for the person,

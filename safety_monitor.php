@@ -4,6 +4,11 @@ addUserMenuEntry( new MenuEntry('safetymon','Safety Monitors','?s=safetymon') );
 addPageHandler( new PageHandler('safetymon','showSafetyMonitors','container') );
 
 function showSafetyMonitors() {
+
+  if( defined('SAFETY_MONITOR_PAGE_HEADER') ) {
+    echo SAFETY_MONITOR_PAGE_HEADER,"\n";
+  }
+
   $today = date("Y-m-d");
   $start_date = array_key_exists('start',$_REQUEST) ? $_REQUEST['start'] : date("Y-m-d");
   $next_month = getNextMonth(date("Y-m-01",strtotime($start_date)));
