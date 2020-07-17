@@ -1,43 +1,36 @@
 <?php
 
-require_once "config.php";
+const SORTABLE_COLUMN = "class='clicksort' onClick='sortTable(this,this.cellIndex+1,1)'";
 
-$sortcode = "class=clicksort onClick='sortTable(this,this.cellIndex+1,1)'";
-$self_path = str_replace("/index.php","/",$_SERVER["PHP_SELF"]);
-$self_full_url = "https://" . $_SERVER["SERVER_NAME"] . $self_path;
+if( !defined('SELF_FULL_URL') ) {
+  define('SELF_FULL_URL',"https://" . $_SERVER["SERVER_NAME"] . str_replace("/index.php","/",$_SERVER["PHP_SELF"]));
+}
+if( !defined('WEB_APP_TOP') ) {
+  define('WEB_APP_TOP','');
+}
 
-$web_user = isset($_SERVER["REMOTE_USER"]) ? $_SERVER["REMOTE_USER"] : "";
+define('REMOTE_USER_NETID',array_key_exists('REMOTE_USER',$_SERVER) ? $_SERVER['REMOTE_USER'] : '');
 
 const INITIALIZING_APPROVAL = 'I';
 const PENDING_APPROVAL = 'P';
-
-if( !isset($webapptop) ) {
-  $webapptop = "";
-}
-
-if( !isset($in_admin_mode) ) {
-  $in_admin_mode = false;
-}
 
 function isDeptAdmin() {
   return count(getAdminDepartments())>0;
 }
 
 function getAdminDepartments() {
-  global $web_user;
   $result = array();
   foreach( DEPT_ADMINS as $department => $admins ) {
-    if( in_array($web_user,$admins) ) $result[] = $department;
+    if( in_array(REMOTE_USER_NETID,$admins) ) $result[] = $department;
   }
   return $result;
 }
 
 function getUserDepartment() {
-  global $web_user;
   $cn = getWebUserName();
   list($first, $last) = explode(" ",$cn,2);
   $email = getWebUserEmail();
-  $results = getLdapInfo($first,"",$last,$email,$web_user);
+  $results = getLdapInfo($first,"",$last,$email,REMOTE_USER_NETID);
   $department = $results && isset($results["department"]) ? $results["department"] : '';
 
   foreach( ALT_DEPARTMENT_NAMES as $alt_department => $alt_names ) {
@@ -540,12 +533,10 @@ class MenuEntry {
   public $url;
 
   function __construct($tag,$label,$url) {
-    global $self_full_url;
-
     $this->tag = $tag;
     $this->label = $label;
     if( !strpos($url,"://") ) {
-      $url_base = preg_replace('{^(.*)\?.*$}','$1',$self_full_url);
+      $url_base = preg_replace('{^(.*)\?.*$}','$1',SELF_FULL_URL);
       if( !preg_match('{/$}',$url_base) && !preg_match('{^/}',$url) ) {
         $url_base .= '/';
       }

@@ -5,7 +5,6 @@ addPageHandler( new PageHandler('pending','showPendingRequests','container-fluid
 addSubmitHandler( new SubmitHandler('pending','savePending') );
 
 function showPendingRequests() {
-  global $sortcode;
 
   if( !isDeptAdmin() ) {
     return;
@@ -34,7 +33,7 @@ function showPendingRequests() {
 
   echo "<p><input type='submit' name='submit' value='Submit'/></p>\n";
 
-  echo "<table class='records'><thead><tr><th $sortcode><small>Aprv</small></th><th $sortcode><small>Deny</small></th><th $sortcode>Time</th><th $sortcode>Who</th><th $sortcode>Room</th><th $sortcode>Building</th><th $sortcode>Purpose</th><th $sortcode>Conflict</th></tr></thead><tbody>\n";
+  echo "<table class='records'><thead><tr><th ",SORTABLE_COLUMN,"><small>Aprv</small></th><th ",SORTABLE_COLUMN,"><small>Deny</small></th><th ",SORTABLE_COLUMN,">Time</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Purpose</th><th ",SORTABLE_COLUMN,">Conflict</th></tr></thead><tbody>\n";
   while( ($row=$stmt->fetch()) ) {
     $why_not_approved = array();
     $roomcap_warnings = array();
@@ -96,7 +95,6 @@ function showPendingRequests() {
 }
 
 function savePending() {
-  global $web_user;
 
   if( !isDeptAdmin() ) {
     return;
@@ -105,13 +103,13 @@ function savePending() {
   $dbh = connectDB();
   $sql = "UPDATE building_access SET APPROVED = 'Y', APPROVED_TIME = now(), APPROVED_BY = :NETID WHERE ID = :ID AND APPROVED = :PENDING_APPROVAL";
   $approve_stmt = $dbh->prepare($sql);
-  $approve_stmt->bindValue(":NETID",$web_user);
+  $approve_stmt->bindValue(":NETID",REMOTE_USER_NETID);
   $approve_stmt->bindParam(":ID",$id);
   $approve_stmt->bindValue(":PENDING_APPROVAL",PENDING_APPROVAL);
 
   $sql = "UPDATE building_access SET APPROVED = 'N', APPROVED_TIME = now(), APPROVED_BY = :NETID, ADMIN_REASON = :REASON WHERE ID = :ID AND APPROVED = :PENDING_APPROVAL";
   $deny_stmt = $dbh->prepare($sql);
-  $deny_stmt->bindValue(":NETID",$web_user);
+  $deny_stmt->bindValue(":NETID",REMOTE_USER_NETID);
   $deny_stmt->bindParam(":ID",$id);
   $deny_stmt->bindParam(":REASON",$reason);
   $deny_stmt->bindValue(":PENDING_APPROVAL",PENDING_APPROVAL);

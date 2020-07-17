@@ -5,9 +5,6 @@ addPageHandler( new PageHandler('data','showData','container-fluid') );
 addDownloadHandler( new DownloadHandler('csv','downloadCSV') );
 
 function showData() {
-  global $sortcode;
-  global $self_full_url;
-
   if( !isDeptAdmin() ) {
     return;
   }
@@ -32,11 +29,11 @@ function showData() {
     echo " - ",htmlescape(date("D, M j, Y",strtotime($end_day)));
   }
   echo "<br>";
-  $url = "$self_full_url?s=data&day=" . $prev_day;
-  if( $prev_day == $today ) $url = $self_full_url;
+  $url = SELF_FULL_URL . "?s=data&day=" . $prev_day;
+  if( $prev_day == $today ) $url = SELF_FULL_URL . "?s=data";
   echo "<a href='$url' class='btn btn-primary'><i class='fas fa-arrow-left'></i></a>\n";
 
-  $url = "$self_full_url?s=data";
+  $url = SELF_FULL_URL . "?s=data";
   if( $cur_day == $today ) {
     $disabled_class = "disabled";
     $url = "#";
@@ -45,8 +42,8 @@ function showData() {
   }
   echo "<a href='$url' class='btn btn-primary $disabled_class'>Today</a>\n";
 
-  $url = "$self_full_url?s=data&day=" . $next_day;
-  if( $next_day == $today ) $url = $self_full_url;
+  $url = SELF_FULL_URL . "?s=data&day=" . $next_day;
+  if( $next_day == $today ) $url = SELF_FULL_URL . "?s=data";
   echo "<a href='$url' class='btn btn-primary'><i class='fas fa-arrow-right'></i></a>\n";
 
   echo "<button class='btn btn-primary' onclick='showMoreOptions()'>...</button>\n";
@@ -65,13 +62,13 @@ function showData() {
     $('#more_options').show();
   }
   function downloadCSV() {
-    var url = "<?php echo $self_full_url ?>?s=csv&day=" + $('#day').val() + "&end=" + $('#end').val();
+    var url = "<?php echo SELF_FULL_URL ?>?s=csv&day=" + $('#day').val() + "&end=" + $('#end').val();
     location.href = url;
   }
   </script><?php
 
-  $date_col = ( $end_day == $next_day ) ? "" : "<th $sortcode>Date</th>";
-  echo "<table class='records'><thead><tr>{$date_col}<th $sortcode>Start</th><th $sortcode>End</th><th $sortcode>Approved</th><th $sortcode>Who</th><th $sortcode>Room</th><th $sortcode>Building</th><th $sortcode>Department</th><th $sortcode>Purpose</th></tr></thead><tbody>\n";
+  $date_col = ( $end_day == $next_day ) ? "" : "<th " . SORTABLE_COLUMN . ">Date</th>";
+  echo "<table class='records'><thead><tr>{$date_col}<th ",SORTABLE_COLUMN,">Start</th><th ",SORTABLE_COLUMN,">End</th><th ",SORTABLE_COLUMN,">Approved</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Department</th><th ",SORTABLE_COLUMN,">Purpose</th></tr></thead><tbody>\n";
   while( ($row=$stmt->fetch()) ) {
     echo "<tr class='record'>";
     $id = $row["ID"];

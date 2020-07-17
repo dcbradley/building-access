@@ -99,7 +99,6 @@ function checkAutoApprovalAndRoomCap(&$why_not_approved,&$warnings,$id,&$request
 }
 
 function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
-  global $web_user;
 
   $dbh = connectDB();
   $sql = "
@@ -155,7 +154,6 @@ function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
 }
 
 function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
-  global $web_user;
 
   if( !BUILDING_FLOOR_MAX_CAP ) return true;
 

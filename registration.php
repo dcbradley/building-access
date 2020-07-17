@@ -6,9 +6,6 @@ addSubmitHandler( new SubmitHandler('request','saveRequest') );
 addSubmitHandler( new SubmitHandler('request_approval','requestApproval') );
 
 function showRequestForm() {
-  global $webapptop;
-  global $web_user;
-  global $self_full_url;
 
   $slot_minutes = 60;
   $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),ALLOWED_REGISTRATION_DAYS);
@@ -20,7 +17,7 @@ function showRequestForm() {
     $dbh = connectDB();
     $stmt = $dbh->prepare($sql);
     $stmt->bindValue(":ID",$request_id);
-    $stmt->bindValue(":NETID",$web_user);
+    $stmt->bindValue(":NETID",REMOTE_USER_NETID);
     $stmt->execute();
     $editing = $stmt->fetch();
     if( $editing ) {
@@ -35,11 +32,11 @@ function showRequestForm() {
   echo REQUEST_FORM_HEADER;
 
   echo "<p>";
-  $url = "$self_full_url?day=" . $prev_day;
-  if( $prev_day == $today ) $url = $self_full_url;
+  $url = SELF_FULL_URL . "?day=" . $prev_day;
+  if( $prev_day == $today ) $url = SELF_FULL_URL;
   echo "<a href='$url' class='btn btn-primary'><i class='fas fa-arrow-left'></i></a>\n";
 
-  $url = $self_full_url;
+  $url = SELF_FULL_URL;
   if( $cur_day == $today ) {
     $disabled_class = "disabled";
     $url = "#";
@@ -48,15 +45,15 @@ function showRequestForm() {
   }
   echo "<a href='$url' class='btn btn-primary $disabled_class'>Today</a>\n";
 
-  $url = "$self_full_url?day=" . $next_day;
-  if( $next_day == $today ) $url = $self_full_url;
+  $url = SELF_FULL_URL . "?day=" . $next_day;
+  if( $next_day == $today ) $url = SELF_FULL_URL;
   echo "<a href='$url' class='btn btn-primary'><i class='fas fa-arrow-right'></i></a>\n";
 
   echo " ",htmlescape(date("D, M j, Y",strtotime($cur_day)));
   echo "</p>\n";
 
   # explicitly set the form url to avoid any query parameters being retained (e.g. id)
-  echo "<form action='$self_full_url' id='registration_form' enctype='multipart/form-data' method='POST' onsubmit='return validateInput();'>\n";
+  echo "<form action='",SELF_FULL_URL,"' id='registration_form' enctype='multipart/form-data' method='POST' onsubmit='return validateInput();'>\n";
   echo "<input type='hidden' name='form' value='request' />\n";
   echo "<input type='hidden' name='day' value='",htmlescape($cur_day),"'/>\n";
   if( $editing ) {
@@ -267,7 +264,7 @@ function showRequestForm() {
         $('#do_filter').attr('disabled',true);
       }
       if( !building ) building = "<?php echo getDefaultBuilding('') ?>";
-      var url = "<?php echo $webapptop ?>usage_info.php?day=<?php echo urlencode($cur_day) ?>&slot_minutes=<?php echo urlencode($slot_minutes) ?>";
+      var url = "<?php echo WEB_APP_TOP ?>usage_info.php?day=<?php echo urlencode($cur_day) ?>&slot_minutes=<?php echo urlencode($slot_minutes) ?>";
       if( $('#do_filter:checked').val() ) {
         url += "&building=" + encodeURIComponent(building);
         url += "&room=" + encodeURIComponent(room);
@@ -327,8 +324,6 @@ function showRequestForm() {
 }
 
 function saveRequest(&$show) {
-  global $web_user;
-  global $self_full_url;
 
   $continue_editing_this_request = false;
   $submission_errors = false;
@@ -395,7 +390,7 @@ function saveRequest(&$show) {
       echo "<div class='alert alert-danger'>No record '",htmlescape($_REQUEST['id']),"' found.</div>\n";
       return;
     }
-    if( $editing["NETID"] != $web_user ) {
+    if( $editing["NETID"] != REMOTE_USER_NETID ) {
       echo "<div class='alert alert-danger'>Permission denied while updating registration '",htmlescape($_REQUEST['id']),"'.</div>\n";
       return;
     }
@@ -477,7 +472,7 @@ function saveRequest(&$show) {
       REPEAT_THROUGH = :REPEAT_THROUGH
     ";
     $stmt = $dbh->prepare($sql);
-    $stmt->bindValue(":NETID",$web_user);
+    $stmt->bindValue(":NETID",REMOTE_USER_NETID);
     $stmt->bindValue(":NAME",getWebUserName());
     $stmt->bindValue(":EMAIL",$email);
     $approved = INITIALIZING_APPROVAL;
@@ -630,7 +625,7 @@ function saveRequest(&$show) {
       $delete_stmt->execute();
       echo "<div class='alert alert-danger'>Submission ignored, because it duplicates a previous submission: ";
       foreach( $dup_ids as $dup_id ) {
-        $url = $self_full_url . "?id=" . $dup_id;
+        $url = SELF_FULL_URL . "?id=" . $dup_id;
         echo "<a href='",htmlescape($url),"'>#",htmlescape($dup_id),"</a> ";
       }
       echo "</div>\n";
@@ -678,7 +673,7 @@ function saveRequest(&$show) {
         foreach( $why_not_approved as $why_not ) {
           echo "<br>",htmlescape($why_not),"\n";
         }
-        echo "<br><form action='$self_full_url' enctype='multipart/form-data' method='POST'>";
+        echo "<br><form action='",SELF_FULL_URL,"' enctype='multipart/form-data' method='POST'>";
         echo "<input type='hidden' name='form' value='request_approval'/>\n";
         echo "<input type='hidden' name='id' value='",htmlescape($id),"'/>\n";
         echo "<input type='submit' value='Request Approval'/>\n";
@@ -690,20 +685,20 @@ function saveRequest(&$show) {
   }
 
   if( count($warnings) ) {
-    $url = $self_full_url . "?id=" . $id;
+    $url = SELF_FULL_URL . "?id=" . $id;
     echo "<div class='alert alert-warning'><a href='",htmlescape($url),"'><i class='far fa-edit'></i>",htmlescape(date('Y-m-d',strtotime($start_time))),"</a> ",implode(" ",$warnings),"</div>\n";
   }
 
   if( count($children_not_approved) ) {
     $continue_editing_this_request = true;
 
-    echo "<form action='$self_full_url' enctype='multipart/form-data' method='POST'>";
+    echo "<form action='",SELF_FULL_URL,"' enctype='multipart/form-data' method='POST'>";
     echo "<input type='hidden' name='form' value='request_approval'/>\n";
     echo "<input type='hidden' name='id' value='",htmlescape($id),"'/>\n";
 
     echo "<div class='alert alert-warning'>Some of the repetitions of this registration were not automatically approved.  You may click <input type='submit' value='Request Approval'/> or modify the request(s) and try again.  The requests that were not approved are ";
     foreach( $children_not_approved as list($child_data,$why_child_not_approved) ) {
-      $url = $self_full_url . "?id=" . $child_data['ID'];
+      $url = SELF_FULL_URL . "?id=" . $child_data['ID'];
       echo "<br><a href='",htmlescape($url),"'><i class='far fa-edit'></i>",htmlescape(date('Y-m-d',strtotime($child_data['START_TIME']))),"</a> ";
       foreach( $why_child_not_approved as $why_not ) {
         echo htmlescape($why_not),"\n";
@@ -715,7 +710,7 @@ function saveRequest(&$show) {
 
   if( count($child_warnings) ) {
     foreach( $child_warnings as list($child_data,$this_child_warnings) ) {
-      $url = $self_full_url . "?id=" . $child_data['ID'];
+      $url = SELF_FULL_URL . "?id=" . $child_data['ID'];
       echo "<div class='alert alert-warning'><a href='",htmlescape($url),"'><i class='far fa-edit'></i>",htmlescape(date('Y-m-d',strtotime($child_data['START_TIME']))),"</a> ";
       echo htmlescape(implode("\n",$this_child_warnings));
       echo "</div>\n";
@@ -838,15 +833,13 @@ function doRepeat($id,&$repeat_status) {
 }
 
 function requestApproval(&$show) {
-  global $web_user;
-  global $self_full_url;
 
   $id = $_POST["id"];
   $dbh = connectDB();
 
   $request = loadRequest($id);
 
-  if( !$request || $request['NETID'] != $web_user ) {
+  if( !$request || $request['NETID'] != REMOTE_USER_NETID ) {
     echo "<div class='alert alert-danger'>Failed to look up request id ",htmlescape($id),".</div>\n";
     return;
   }
@@ -855,7 +848,7 @@ function requestApproval(&$show) {
   if( $request['REPEAT_PARENT'] ) {
     $sql = "SELECT * FROM building_access WHERE NETID = :NETID AND REPEAT_PARENT = :REPEAT_PARENT AND START_TIME >= :START_TIME AND APPROVED = '" . INITIALIZING_APPROVAL . "' ORDER BY START_TIME";
     $child_stmt = $dbh->prepare($sql);
-    $child_stmt->bindValue(':NETID',$web_user);
+    $child_stmt->bindValue(':NETID',REMOTE_USER_NETID);
     $child_stmt->bindValue(':REPEAT_PARENT',$request['REPEAT_PARENT']);
     $child_stmt->bindValue(':START_TIME',$request['START_TIME']);
     $child_stmt->execute();
@@ -886,7 +879,7 @@ function requestApproval(&$show) {
   }
   $msg[] = '';
   $msg[] = "This request was not automatically approved.  To approve/deny this request, go here:";
-  $msg[] = $self_full_url . "?s=pending";
+  $msg[] = SELF_FULL_URL . "?s=pending";
 
   $msg = implode("\r\n",$msg);
 

@@ -2,8 +2,7 @@
 
 require_once "db.php";
 require_once "common.php";
-
-$web_user = isset($_SERVER["REMOTE_USER"]) ? $_SERVER["REMOTE_USER"] : "";
+require_once "config.php";
 
 if( !defined('ORGANIZE_RESERVATIONS_BY_FLOOR') || ORGANIZE_RESERVATIONS_BY_FLOOR ) {
   $organize_reservations_by_floor = true;
@@ -37,7 +36,7 @@ $dbh = connectDB();
 $sql = "SELECT * FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND (APPROVED NOT IN ('N','" . INITIALIZING_APPROVAL . "') OR NETID = :NETID) {$building_sql} ORDER BY START_TIME,REQUESTED";
 $stmt = $dbh->prepare($sql);
 
-$stmt->bindValue(":NETID",$web_user);
+$stmt->bindValue(":NETID",REMOTE_USER_NETID);
 if( $building_sql ) {
   $stmt->bindValue(":BUILDING",$_REQUEST["building"]);
 }
@@ -140,7 +139,7 @@ for( $hour=0; $hour < 24; $hour++ ) {
       } else {
         $building = "";
       }
-      if( $row["NETID"] == $web_user ) {
+      if( $row["NETID"] == REMOTE_USER_NETID ) {
         $edit = "<a href='?id=" . htmlescape($row["ID"]) . "'><i class='far fa-edit'></i></a>";
       } else {
         $edit = "";

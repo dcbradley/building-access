@@ -1,18 +1,19 @@
 <?php
   ini_set('display_errors', 'On');
 
+  $website_title = "Marauder’s Mapp";
+  $page_title = "Marauder’s Mapp";
+
+  $show = isset($_REQUEST["s"]) ? $_REQUEST["s"] : "";
+
   require_once "db.php";
   require_once "common.php";
+  require_once "config.php";
   require_once "people_ldap.php";
   require_once "policy.php";
   require_once "registration.php";
   require_once "approval.php";
   require_once "show_data.php";
-
-  $website_title = "Marauder’s Mapp";
-  $page_title = "Marauder’s Mapp";
-
-  $show = isset($_REQUEST["s"]) ? $_REQUEST["s"] : "";
 
   foreach( $download_handlers as $handler ) {
     if( $show == $handler->tag ) {
@@ -27,19 +28,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <link rel="stylesheet" href="<?php echo $webapptop ?>bootstrap/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"/>
-  <link href="<?php echo $webapptop ?>style.css" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="<?php echo WEB_APP_TOP ?>bootstrap/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"/>
+  <link href="<?php echo WEB_APP_TOP ?>style.css" rel="stylesheet" type="text/css"/>
   <title><?php echo $website_title ?></title>
 </head>
 <body>
 
 <?php
 
-if( !$web_user ) {
+if( !REMOTE_USER_NETID ) {
   echo "<p>Unauthenticated access denied.</p>\n";
 } else {
 
-  showNavbar($web_user,$show);
+  showNavbar($show);
 
   if( isset($_POST["form"]) ) {
     $form = $_POST["form"];
@@ -64,22 +65,21 @@ if( !$web_user ) {
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="<?php echo $webapptop ?>bootstrap/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"></script>
+<script src="<?php echo WEB_APP_TOP ?>bootstrap/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"></script>
 <script src="tablesort.js"></script>
 </body>
 </html>
 
 <?php
 
-function showNavbar($user,$show) {
-  global $webapptop;
+function showNavbar($show) {
   global $page_title;
   global $user_menu;
   global $admin_menu;
 
 ?>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-      <span class="navbar-brand" href="#"><img src="<?php echo $webapptop ?>uwcrest_web_sm.png" height="30" class="d-inline-block align-top" alt="UW"> <?php echo $page_title ?></span>
+      <span class="navbar-brand" href="#"><img src="<?php echo WEB_APP_TOP ?>uwcrest_web_sm.png" height="30" class="d-inline-block align-top" alt="UW"> <?php echo $page_title ?></span>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
