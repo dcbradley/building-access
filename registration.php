@@ -569,7 +569,7 @@ function saveRequest(&$show) {
   }
   $stmt->bindValue(":BUILDING",$building);
 
-  $room = canonicalRoomList($room);
+  $room = canonicalRoomList($room,$building);
   if( !$room ) {
     echo "<div class='alert alert-danger'>You must specify a room.</div>\n";
     $submission_errors = true;

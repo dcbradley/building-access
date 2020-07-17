@@ -98,7 +98,7 @@ function fileSafeName($unsafe) {
   return $result;
 }
 
-function canonicalRoomList($rooms) {
+function canonicalRoomList($rooms,$building) {
   $building_regex = getBuildingRegex();
   # replace '1234 Ch' --> '1234'
   do {
@@ -120,6 +120,9 @@ function canonicalRoomList($rooms) {
       $r = trim(substr($r,4));
     }
     if( $r == "" ) continue;
+    if( function_exists('GET_CANONICAL_ROOM') ) {
+      $r = GET_CANONICAL_ROOM($r,$building);
+    }
     $rooms_array[] = $r;
   }
   return implode(", ",$rooms_array);

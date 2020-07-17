@@ -27,8 +27,9 @@ function matchRoom($filter_room_regex,$rooms) {
   return $matched;
 }
 
+$building = array_key_exists('building',$_REQUEST) ? $_REQUEST['building'] : '';
 $building_sql = '';
-if( isset($_REQUEST['building']) && $_REQUEST['building'] ) {
+if( $building ) {
   $building_sql = 'AND BUILDING = :BUILDING';
 }
 
@@ -38,13 +39,13 @@ $stmt = $dbh->prepare($sql);
 
 $stmt->bindValue(":NETID",REMOTE_USER_NETID);
 if( $building_sql ) {
-  $stmt->bindValue(":BUILDING",$_REQUEST["building"]);
+  $stmt->bindValue(":BUILDING",$building);
 }
 
 $cur_day = $_REQUEST["day"];
 $slot_minutes = $_REQUEST["slot_minutes"];
 $filter_room = isset($_REQUEST["room"]) ? $_REQUEST["room"] : "";
-$filter_room = canonicalRoomList($filter_room);
+$filter_room = canonicalRoomList($filter_room,$building);
 
 $filter_room_regex = "";
 foreach( preg_split("{ *, *}",$filter_room) as $room ) {

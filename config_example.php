@@ -56,6 +56,18 @@ const DEPT_DEFAULT_BUILDING = array(
 
 const UNKNOWN_DEPT_DEFAULT_BUILDING = "";
 
+# Optional function to rewrite rooms to canonical form.
+# This is useful if there is more than one name for a room.
+# Rewriting all the different names to one official name will allow room capacity policy to work.
+#function GET_CANONICAL_ROOM($room,$building) {
+#  if( $building == "Chamberlin" ) {
+#    switch($room) {
+#    case '2254': return '2260';
+#    }
+#  }
+#  return $room;
+#}
+
 const MIN_REGISTRATION_HOUR = 6;
 const MAX_REGISTRATION_HOUR = 22;
 const DISALLOW_REGISTRATION_OUTSIDE_MINMAX = false;
