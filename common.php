@@ -485,6 +485,18 @@ function getPrevDay($date_str) {
   return $dt->format('Y-m-d');
 }
 
+function getNextMonth($date_str) {
+  $dt = new DateTime($date_str);
+  $dt->add(new DateInterval('P1M'));
+  return $dt->format('Y-m-d');
+}
+
+function getPrevMonth($date_str) {
+  $dt = new DateTime($date_str);
+  $dt->sub(new DateInterval('P1M'));
+  return $dt->format('Y-m-d');
+}
+
 function getDayChar($date_str) {
   return dayNameToChar(date("l",strtotime($date_str)));
 }
@@ -525,6 +537,26 @@ function implode_and($a) {
     $result .= $a[$i];
   }
   return $result;
+}
+
+function getPersonContactInfo($netid,$name,$email) {
+  static $cached_contact_info = array();
+  if( array_key_exists($netid,$cached_contact_info) ) {
+    return $cached_contact_info[$netid];
+  }
+  $results = array();
+  $results["netid"] = $netid;
+  $results["name"] = $name;
+  $results["email"] = $email;
+  $search_url = "https://www.wisc.edu/search/?q=" . urlencode($name);
+  $results["url"] = $search_url;
+
+  if( function_exists('GET_PERSON_CONTACT_INFO') ) {
+    GET_PERSON_CONTACT_INFO($results);
+  }
+
+  $cached_contact_info[$netid] = $results;
+  return $results;
 }
 
 class MenuEntry {

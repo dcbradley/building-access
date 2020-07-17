@@ -14,6 +14,9 @@
   require_once "registration.php";
   require_once "approval.php";
   require_once "show_data.php";
+  if( SAFETY_MONITOR_SIGNUP ) {
+    require_once "safety_monitor.php";
+  }
 
   foreach( $download_handlers as $handler ) {
     if( $show == $handler->tag ) {

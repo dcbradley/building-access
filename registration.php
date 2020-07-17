@@ -82,7 +82,11 @@ function showRequestForm() {
   echo "<div class='field-input'><input type='text' name='purpose' maxlength='280' value='",htmlescape($value),"'/></div>\n";
 
   if( defined('SAFETY_MONITOR_SIGNUP') && SAFETY_MONITOR_SIGNUP ) {
-    $checked = $editing && array_key_exists("SAFETY_MONITOR",$editing) && $editing["SAFETY_MONITOR"] ? "checked" : "";
+    if( $editing ) {
+      $checked = array_key_exists("SAFETY_MONITOR",$editing) && $editing["SAFETY_MONITOR"] ? "checked" : "";
+    } else {
+      $checked = array_key_exists("safety_monitor",$_REQUEST) && $_REQUEST["safety_monitor"] ? "checked" : "";
+    }
     echo "<div class='field-input'><label><input type='checkbox' name='safety_monitor' value='1' $checked /> I will act as a safety monitor during this time</label></div>\n";
   }
 
@@ -101,12 +105,20 @@ function showRequestForm() {
   echo "<div>";
   echo "<div style='display: inline-block; padding-right: 3em;'>";
   echo "<div class='field-title'><label for='start_time'>Start Time</label></div>\n";
-  $value = $editing ? date("H:i",strtotime($editing["START_TIME"])) : "";
+  if( $editing ) {
+    $value = date("H:i",strtotime($editing["START_TIME"]));
+  } else {
+    $value = array_key_exists('start_time',$_REQUEST) ? $_REQUEST['start_time'] : "";
+  }
   echo "<div class='field-input'><input type='time' name='start_time' id='start_time' placeholder='14:00' value='",htmlescape($value),"' onchange='updateSlotInfo()'/></div>\n";
   echo "</div>\n";
   echo "<div style='display: inline-block; padding-right: 3em;'>";
   echo "<div class='field-title'><label for='end_time'>End Time</label></div>\n";
-  $value = $editing ? date("H:i",strtotime($editing["END_TIME"])) : "";
+  if( $editing ) {
+    $value = date("H:i",strtotime($editing["END_TIME"]));
+  } else {
+    $value = array_key_exists('end_time',$_REQUEST) ? $_REQUEST['end_time'] : "";
+  }
   echo "<div class='field-input'><input type='time' name='end_time' id='end_time' placeholder='15:00' value='",htmlescape($value),"' onchange='updateSlotInfo()'/></div>\n";
   echo "</div>\n";
   $checked = $editing && $editing['REPEAT_PARENT'] ? 'checked' : '';

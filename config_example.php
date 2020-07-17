@@ -91,3 +91,17 @@ const BUILDING_FLOOR_MAX_CAP = null;
 
 # show checkbox for signing up as a safety monitor?
 const SAFETY_MONITOR_SIGNUP = false;
+
+# array of entries of form:
+# array('days' => day_chars, 'start' => start_time_24h, 'end' => end_time_24h)
+# Example:
+#   array('days' => "MTWR",'start' => "17:00",'end' => "22:00"),
+
+const SAFETY_MONITOR_HOURS = array(
+);
+
+# Optional function to get contact info for a person.
+# $info is an array containing the following keys: netid, name, email
+# You may fill in the additional keys url and phone.
+#function GET_PERSON_CONTACT_INFO(&$info) {
+#}
