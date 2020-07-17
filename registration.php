@@ -81,12 +81,12 @@ function showRequestForm() {
   $value = $editing ? $editing["PURPOSE"] : "";
   echo "<div class='field-input'><input type='text' name='purpose' maxlength='280' value='",htmlescape($value),"'/></div>\n";
 
-  if( defined('SAFETY_MONITOR_SIGNUP') && SAFETY_MONITOR_SIGNUP ) {
-    if( $editing ) {
-      $checked = array_key_exists("SAFETY_MONITOR",$editing) && $editing["SAFETY_MONITOR"] ? "checked" : "";
-    } else {
-      $checked = array_key_exists("safety_monitor",$_REQUEST) && $_REQUEST["safety_monitor"] ? "checked" : "";
-    }
+  if( $editing ) {
+    $checked = array_key_exists("SAFETY_MONITOR",$editing) && $editing["SAFETY_MONITOR"] ? "checked" : "";
+  } else {
+    $checked = array_key_exists("safety_monitor",$_REQUEST) && $_REQUEST["safety_monitor"] ? "checked" : "";
+  }
+  if( $checked ) {
     echo "<div class='field-input'><label><input type='checkbox' name='safety_monitor' value='1' $checked /> I will act as a safety monitor during this time</label></div>\n";
   }
 
