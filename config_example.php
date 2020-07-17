@@ -102,6 +102,8 @@ const SAFETY_MONITOR_HOURS = array(
 
 # Optional function to get contact info for a person.
 # $info is an array containing the following keys: netid, name, email
-# You may fill in the additional keys url and phone.
+# An additional key, 'url' defaults to the wisc.edu search page for the person,
+# but you can overwrite that to be any other URL.
+# You may fill in the additional key 'phone'.
 #function GET_PERSON_CONTACT_INFO(&$info) {
 #}
