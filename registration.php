@@ -196,7 +196,9 @@ function showRequestForm() {
 
   echo "<div id='filter_control' class='disabled'><label><input type='checkbox' name='do_filter' id='do_filter' value='1' checked disabled onchange='updateSlotInfo()'/> filter times and rooms shown below using the data entered above</label></div>\n";
 
-  for( $hour=MIN_REGISTRATION_HOUR; $hour <= MAX_REGISTRATION_HOUR; $hour++ ) {
+  $min_hour = (int)explode(":",MIN_REGISTRATION_TIME)[0];
+  $max_hour = (int)explode(":",MAX_REGISTRATION_TIME)[0];
+  for( $hour=$min_hour; $hour < $max_hour; $hour++ ) {
     if( $hour < 12 ) {
       $hour12 = $hour;
       $ampm = "am";
@@ -335,6 +337,17 @@ function showRequestForm() {
   </script><?php
 }
 
+function clearRegistrationSubmitVars() {
+  foreach( $_REQUEST as $var => $value ) {
+    if( $var == "s" ) continue;
+    unset($_REQUEST[$var]);
+  }
+  foreach( $_POST as $var => $value ) {
+    if( $var == "s" ) continue;
+    unset($_POST[$var]);
+  }
+}
+
 function saveRequest(&$show) {
 
   $continue_editing_this_request = false;
@@ -380,16 +393,20 @@ function saveRequest(&$show) {
   if( strcmp($start_time,$end_time) > 0 ) {
     $trange = date("g:ia",$start_time_t) . "-" . date("g:ia",$end_time_t);
     echo "<div class='alert alert-danger'>Not saved.  Time range appears to be backwards: ",htmlescape($trange),".  Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+    clearRegistrationSubmitVars();
     return;
   }
 
-  if( DISALLOW_REGISTRATION_OUTSIDE_MINMAX ) {
-    $start_hour = date('G',$start_time_t);
-    $end_hour = date('G',$end_time_t);
-    if( $start_hour < MIN_REGISTRATION_HOUR || $end_hour > MAX_REGISTRATION_HOUR ) {
-      $min_hour = date('ga',strtotime($cur_day . MIN_REGISTRATION_HOUR . ":00"));
-      $max_hour = date('ga',strtotime($cur_day . MAX_REGISTRATION_HOUR . ":00"));
-      echo "<div class='alert alert-danger'>Reservations must be between ",htmlescape($min_hour)," and ",htmlescape($max_hour),". Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+  if( !ALLOW_REGISTRATION_OUTSIDE_MINMAX ) {
+    $start_hm = date('H:i',$start_time_t);
+    $end_hm = date('H:i',$end_time_t);
+    $min_hm24 = date('H:i',strtotime($cur_day . " " . MIN_REGISTRATION_TIME));
+    $max_hm24 = date('H:i',strtotime($cur_day . " " . MAX_REGISTRATION_TIME));
+    if( $start_hm < $min_hm24 || $end_hm > $max_hm24 ) {
+      $min_hm = date('g:ia',strtotime($cur_day . " " . MIN_REGISTRATION_TIME));
+      $max_hm = date('g:ia',strtotime($cur_day . " " . MAX_REGISTRATION_TIME));
+      echo "<div class='alert alert-danger'>Reservations must be between ",htmlescape($min_hm)," and ",htmlescape($max_hm),". Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+      clearRegistrationSubmitVars();
       return;
     }
   }
@@ -427,7 +444,7 @@ function saveRequest(&$show) {
       }
       $count_str = $row_count > 1 ? " {$row_count} registrations" : "";
       echo "<div class='alert alert-success'>Deleted{$count_str}.</div>\n";
-      $_REQUEST["id"] = ""; # clear form
+      clearRegistrationSubmitVars();
       return;
     }
     $approved = $editing["APPROVED"];
