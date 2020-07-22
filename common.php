@@ -571,7 +571,7 @@ function loadPeople($department) {
   if( $netid_colnum !== null ) while( ($row=fgetcsv($F)) ) {
     $person = array();
     for($i=min(count($row),count($colname)); $i--; ) {
-      if( $colname[$i] ) {
+      if( $colname[$i] && $row[$i] ) {
         $person[$colname[$i]] = $row[$i];
       }
     }
