@@ -9,8 +9,6 @@ function showSafetyMonitors() {
     echo SAFETY_MONITOR_PAGE_HEADER,"\n";
   }
 
-  $eligible_safety_monitor = eligibleSafetyMonitor(REMOTE_USER_NETID,getUserDepartment());
-
   $today = date("Y-m-d");
   $start_date = array_key_exists('start',$_REQUEST) ? $_REQUEST['start'] : date("Y-m-d");
   $next_month = getNextMonth(date("Y-m-01",strtotime($start_date)));
@@ -50,11 +48,25 @@ function showSafetyMonitors() {
   }
   </script><?php
 
+  showSafetyMonitorsForDates($start_date,$end_date);
+
+}
+
+function showSafetyMonitorsForDates($start_date,$end_date,$title=null) {
   $dbh = connectDB();
   $sql = "SELECT ID,NAME,NETID,START_TIME,END_TIME,ROOM,BUILDING,EMAIL,DEPARTMENT FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND SAFETY_MONITOR = 'Y' ORDER BY START_TIME,NAME";
   $stmt = $dbh->prepare($sql);
 
+  $today = date("Y-m-d");
+  $eligible_safety_monitor = eligibleSafetyMonitor(REMOTE_USER_NETID,getUserDepartment());
+
+  $add_spacer = false;
   for( $cur_day=$start_date; $cur_day<$end_date; $cur_day=getNextDay($cur_day) ) {
+
+    if( $add_spacer ) {
+      $add_spacer = false;
+      echo "<div style='padding-top: 0.5em;'></div>\n";
+    }
 
     $day_header_printed = false;
     $day_char = getDayChar($cur_day);
@@ -69,6 +81,7 @@ function showSafetyMonitors() {
         $day_header_printed = true;
         echo "<div class='card'><div class='card-body'>\n";
         $day_desc = date("l, M d",strtotime($cur_day));
+	if( $title ) $day_desc = $title;
         echo "<h5 class='card-title'>",htmlescape($day_desc),"</h5>\n";
       }
 
@@ -82,6 +95,7 @@ function showSafetyMonitors() {
       $stmt->execute();
       $signed_up = false;
       while( ($row=$stmt->fetch()) ) {
+        echo "<div class='safety-monitor-row'>";
         $timerange = date("g:ia",strtotime($row["START_TIME"])) . " - " . date("g:ia",strtotime($row["END_TIME"]));
 	if( $row["NETID"] == REMOTE_USER_NETID ) {
           echo "<a href='?id=" . htmlescape($row["ID"]) . "'><i class='far fa-edit'></i></a>";
@@ -100,7 +114,7 @@ function showSafetyMonitors() {
 	if( array_key_exists("PHONE",$person_info) ) {
 	  echo " &nbsp;&nbsp;",htmlescape($person_info["PHONE"]);
 	}
-	echo "<br>\n";
+	echo "</div>\n";
       }
       if( !$signed_up && $cur_day >= $today && $eligible_safety_monitor ) {
         echo "<form action='",SELF_FULL_URL,"' enctype='multipart/form-data' method='POST' onsubmit='return validateInput();'>\n";
@@ -117,7 +131,7 @@ function showSafetyMonitors() {
     }
     if( $day_char == 'S' ) {
       # end of week spacer
-      echo "<div style='padding-top: 0.5em;'></div>\n";
+      $add_spacer = true;
     }
   }
 }
@@ -128,4 +142,9 @@ function eligibleSafetyMonitor($netid,$department) {
     return $person_info["SAFETY_MONITOR"] == "Y";
   }
   return false;
+}
+
+function showSafetyMonitorsForDate($date) {
+  if( !SAFETY_MONITOR_SIGNUP ) return;
+  showSafetyMonitorsForDates($date,getNextDay($date),"Safety Monitors");
 }
