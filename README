@@ -24,6 +24,16 @@ edit.  The building name used for the csv file must match the building
 name in config.php with all characters but alphabetic and numeric
 stripped.
 
+Copy people/ExampleDepartment.csv to people/YourDepartmentName.csv and
+edit.  This file is currently only used for listing people who are
+approved to act as safety monitors, so if you aren't using that
+feature, there is no need to configure this file.  All columns but
+NETID are optional.  If a column URL is provided, it will be used in
+place of a wisc.edu search for the person when the person is listed as
+a safety monitor.  The department name used for the csv file must
+match the department name in config.php with all characters but
+alphabetic and numeric stripped.
+
 Copy db_example.php to db.php and insert db access parameters.
 
 Example of how to set up the database:
