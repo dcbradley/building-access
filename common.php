@@ -184,6 +184,12 @@ function parseRoomBuildingList($str,$department) {
   return $results;
 }
 
+function canonicalCSVColName($name) {
+  $name = strtoupper(trim($name));
+  $name = preg_replace('{\s+}','_',$name);
+  return $name;
+}
+
 $loaded_approvals = array();
 function getApprovals($department) {
   global $loaded_approvals;
@@ -197,7 +203,7 @@ function getApprovals($department) {
     $header = fgetcsv($F);
     $colname = array();
     foreach( $header as $h ) {
-      $h = strtoupper(trim($h));
+      $h = canonicalCSVColName($h);
       switch($h) {
       case "FIRST":
       case "LAST":
@@ -251,7 +257,7 @@ function getRoomCaps($building) {
     $header = fgetcsv($F);
     $colname = array();
     foreach( $header as $h ) {
-      $h = strtoupper($h);
+      $h = canonicalCSVColName($h);
       switch($h) {
       case "ROOM":
       case "NORMCAP":
@@ -542,24 +548,76 @@ function implode_and($a) {
   return $result;
 }
 
-function getPersonContactInfo($netid,$name,$email) {
-  static $cached_contact_info = array();
-  if( array_key_exists($netid,$cached_contact_info) ) {
-    return $cached_contact_info[$netid];
+function loadPeople($department) {
+  static $cached_people = array();
+  if( array_key_exists($department,$cached_people) ) {
+    return $cached_people[$department];
   }
-  $results = array();
-  $results["netid"] = $netid;
-  $results["name"] = $name;
-  $results["email"] = $email;
-  $search_url = "https://www.wisc.edu/search/?q=" . urlencode($name);
-  $results["url"] = $search_url;
+  $people = array();
+  $fname = "people/" . fileSafeName($department) . ".csv";
+  if( !file_exists($fname) ) {
+    $cached_people[$department] = $people;
+    return $people;
+  }
+  $F = fopen($fname,"r");
+  $header = fgetcsv($F);
+  $colname = array();
+  $netid_colnum = null;
+  foreach( $header as $h ) {
+    $h = canonicalCSVColName($h);
+    if( $h == "NETID" ) $netid_colnum = count($colname);
+    $colname[] = $h;
+  }
+  if( $netid_colnum !== null ) while( ($row=fgetcsv($F)) ) {
+    $person = array();
+    for($i=min(count($row),count($colname)); $i--; ) {
+      if( $colname[$i] ) {
+        $person[$colname[$i]] = $row[$i];
+      }
+    }
+    if( array_key_exists("NETID",$person) && $person["NETID"] ) {
+      $people[$person["NETID"]] = $person;
+    }
+  }
+  $cached_people[$department] = $people;
+  return $people;
+}
 
-  if( function_exists('GET_PERSON_CONTACT_INFO') ) {
-    GET_PERSON_CONTACT_INFO($results);
+function loadPersonInfo($netid,$department) {
+  $people = loadPeople($department);
+  if( array_key_exists($netid,$people) ) {
+    return $people[$netid];
+  }
+  return array("NETID" => $netid, "DEPARTMENT" => $department);
+}
+
+function getPersonInfo($netid,$name,$email,$department) {
+  static $cached_person_info = array();
+  if( array_key_exists($netid,$cached_person_info) ) {
+    return $cached_person_info[$netid];
   }
 
-  $cached_contact_info[$netid] = $results;
-  return $results;
+  $person_info = loadPersonInfo($netid,$department);
+  if( $name && !array_key_exists("NAME",$person_info) ) {
+    $person_info["NAME"] = $name;
+  }
+  if( !array_key_exists("NAME",$person_info) && array_key_exists("FIRST",$person_info) && array_key_exists("LAST",$person_info) ) {
+    $person_info["NAME"] = $person_info["FIRST"] . " " . $person_info["LAST"];
+  }
+  if( $email && !array_key_exists("EMAIL",$person_info) ) {
+    $person_info["EMAIL"] = $email;
+  }
+  if( !array_key_exists("URL",$person_info) && array_key_exists("NAME",$person_info) ) {
+    $search_url = "https://www.wisc.edu/search/?q=" . urlencode($person_info["NAME"]);
+    $person_info["URL"] = $search_url;
+  }
+  if( function_exists('GET_PERSON_INFO') ) {
+    GET_PERSON_INFO($person_info);
+  }
+
+  $cached_person_info[$netid] = $person_info;
+
+  return $person_info;
 }
 
 class MenuEntry {

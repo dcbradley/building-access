@@ -114,10 +114,16 @@ const SAFETY_MONITOR_HOURS = array(
 
 const SAFETY_MONITOR_PAGE_HEADER = "<p>Safety monitors are required for building use Mon-Thurs 5pm-10pm and Friday-Saturday 8am-5pm.</p>\n";
 
-# Optional function to get contact info for a person.
-# $info is an array containing the following keys: netid, name, email
-# An additional key, 'url' defaults to the wisc.edu search page for the person,
-# but you can overwrite that to be any other URL.
-# You may fill in the additional key 'phone'.
-#function GET_PERSON_CONTACT_INFO(&$info) {
+# Optional function to provide information about a person.  You may
+# instead or in addition put information about people in
+# people/DepartmentName.csv.
+# $info is an array containing the following keys: NETID, NAME, EMAIL,
+# DEPARTMENT.  Any information found in the csv file will be present
+# in $info when this function is called if the person's NETID was
+# found in the csv.  An additional key, 'URL' defaults to the wisc.edu
+# search page for the person, but you can overwrite that to be any
+# other URL.  You may fill in the additional keys 'PHONE' and
+# 'SAFETY_MONITOR'.
+
+#function GET_PERSON_INFO(&$info) {
 #}

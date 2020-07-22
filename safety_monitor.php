@@ -9,6 +9,8 @@ function showSafetyMonitors() {
     echo SAFETY_MONITOR_PAGE_HEADER,"\n";
   }
 
+  $eligible_safety_monitor = eligibleSafetyMonitor(REMOTE_USER_NETID,getUserDepartment());
+
   $today = date("Y-m-d");
   $start_date = array_key_exists('start',$_REQUEST) ? $_REQUEST['start'] : date("Y-m-d");
   $next_month = getNextMonth(date("Y-m-01",strtotime($start_date)));
@@ -49,7 +51,7 @@ function showSafetyMonitors() {
   </script><?php
 
   $dbh = connectDB();
-  $sql = "SELECT ID,NAME,NETID,START_TIME,END_TIME,ROOM,BUILDING,EMAIL FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND SAFETY_MONITOR = 'Y' ORDER BY START_TIME,NAME";
+  $sql = "SELECT ID,NAME,NETID,START_TIME,END_TIME,ROOM,BUILDING,EMAIL,DEPARTMENT FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND SAFETY_MONITOR = 'Y' ORDER BY START_TIME,NAME";
   $stmt = $dbh->prepare($sql);
 
   for( $cur_day=$start_date; $cur_day<$end_date; $cur_day=getNextDay($cur_day) ) {
@@ -85,22 +87,22 @@ function showSafetyMonitors() {
           echo "<a href='?id=" . htmlescape($row["ID"]) . "'><i class='far fa-edit'></i></a>";
 	  $signed_up = true;
 	}
-	$person_info = getPersonContactInfo($row["NETID"],$row["NAME"],$row["EMAIL"]);
-	$url = array_key_exists("url",$person_info) ? $person_info["url"] : "";
+	$person_info = getPersonInfo($row["NETID"],$row["NAME"],$row["EMAIL"],$row["DEPARTMENT"]);
+	$url = array_key_exists("URL",$person_info) ? $person_info["URL"] : "";
 	if( $url ) {
           echo "<a href='",htmlescape($url),"'>";
 	}
-	echo htmlescape($row["NAME"]);
+	echo "<span style='white-space: nowrap'>",htmlescape($row["NAME"]),"</span>";
 	if( $url ) {
 	  echo "</a>";
 	}
-	echo " ",htmlescape($timerange)," ",htmlescape($row["BUILDING"])," ",htmlescape($row["ROOM"]);
-	if( array_key_exists("phone",$person_info) ) {
-	  echo " &nbsp;&nbsp;",htmlescape($person_info["phone"]);
+	echo " <span style='white-space: nowrap'>",htmlescape($timerange),"</span> &nbsp;&nbsp;<span style='white-space: nowrap'>",htmlescape($row["BUILDING"])," ",htmlescape($row["ROOM"]),"</span>";
+	if( array_key_exists("PHONE",$person_info) ) {
+	  echo " &nbsp;&nbsp;",htmlescape($person_info["PHONE"]);
 	}
 	echo "<br>\n";
       }
-      if( !$signed_up && $cur_day >= $today ) {
+      if( !$signed_up && $cur_day >= $today && $eligible_safety_monitor ) {
         echo "<form action='",SELF_FULL_URL,"' enctype='multipart/form-data' method='POST' onsubmit='return validateInput();'>\n";
 	echo "<input type='hidden' name='day' value='$cur_day'/>\n";
 	echo "<input type='hidden' name='start_time' value='$start_time'/>\n";
@@ -118,4 +120,12 @@ function showSafetyMonitors() {
       echo "<div style='padding-top: 0.5em;'></div>\n";
     }
   }
+}
+
+function eligibleSafetyMonitor($netid,$department) {
+  $person_info = getPersonInfo($netid,getWebUserName(),getWebUserEmail(),$department);
+  if( array_key_exists("SAFETY_MONITOR",$person_info) ) {
+    return $person_info["SAFETY_MONITOR"] == "Y";
+  }
+  return false;
 }
