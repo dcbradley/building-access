@@ -517,6 +517,10 @@ function saveRequest(&$show) {
   $stmt->bindValue(":DEPARTMENT",$department);
 
   $safety_monitor = array_key_exists("safety_monitor",$_REQUEST) && $_REQUEST["safety_monitor"] ? 'Y' : '';
+  if( $safety_monitor && !eligibleSafetyMonitor(REMOTE_USER_NETID,$department) ) {
+    echo "<div class='alert alert-danger'>You are not on the list of eligible safety monitors, so the safety monitor checkbox has been ignored in this registration.</div>\n";
+    $safety_monitor = '';
+  }
   $stmt->bindValue(":SAFETY_MONITOR",$safety_monitor);
 
   $purpose = $_REQUEST["purpose"];
