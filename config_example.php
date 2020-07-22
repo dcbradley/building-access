@@ -101,8 +101,11 @@ function PARSE_ROOM_BUILDING($input_room,$department,&$room,&$building) {
 # max capacity per floor
 const BUILDING_FLOOR_MAX_CAP = null;
 
-# show checkbox for signing up as a safety monitor?
+# show safety monitor signup page?
 const SAFETY_MONITOR_SIGNUP = false;
+
+# show safety monitor panel on the registration page?
+const SAFETY_MONITOR_PANEL = true;
 
 # array of entries of form:
 # array('days' => day_chars, 'start' => start_time_24h, 'end' => end_time_24h)

@@ -52,9 +52,11 @@ function showRequestForm() {
   echo " ",htmlescape(date("D, M j, Y",strtotime($cur_day)));
   echo "</p>\n";
 
-  echo "<div id='safety-monitor-panel'>\n";
-  showSafetyMonitorsForDate($cur_day);
-  echo "</div>\n";
+  if( defined('SAFETY_MONITOR_PANEL') && SAFETY_MONITOR_PANEL ) {
+    echo "<div id='safety-monitor-panel'>\n";
+    showSafetyMonitorsForDate($cur_day);
+    echo "</div>\n";
+  }
 
   # explicitly set the form url to avoid any query parameters being retained (e.g. id)
   echo "<form action='",SELF_FULL_URL,"' id='registration_form' enctype='multipart/form-data' method='POST' onsubmit='return validateInput();'>\n";
