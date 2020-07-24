@@ -71,11 +71,10 @@ function showSafetyMonitorsForDates($start_date,$end_date,$title=null) {
     $day_header_printed = false;
     $day_char = getDayChar($cur_day);
 
-    foreach( SAFETY_MONITOR_HOURS as $hours ) {
-      $days = $hours['days'];
+    $times = getAllowedTimes24Array($cur_day,SAFETY_MONITOR_HOURS);
+    foreach( $times as $hours ) {
       $start_time = $hours['start'];
       $end_time = $hours['end'];
-      if( strpos($days,$day_char) === false ) continue;
 
       if( !$day_header_printed ) {
         $day_header_printed = true;
