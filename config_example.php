@@ -68,10 +68,13 @@ const UNKNOWN_DEPT_DEFAULT_BUILDING = "";
 #  return $room;
 #}
 
-const MIN_REGISTRATION_TIME = "06:00";
-const MAX_REGISTRATION_TIME = "22:00";
+const REGISTRATION_HOURS = array(
+  array('days' => 'MTWR','start' => '06:00','end' => '22:00'),
+  array('days' => 'F',   'start' => '06:00','end' => '17:00'),
+  array('days' => 'SU',  'start' => '08:00','end' => '17:00'),
+);
+
 const ALLOW_REGISTRATION_OUTSIDE_MINMAX = true;
-const ALLOWED_REGISTRATION_DAYS = 'MTWRFSU';
 
 const REQUEST_FORM_HEADER = "
   <p>Use this form to register access to Chamberlin and Sterling Hall.

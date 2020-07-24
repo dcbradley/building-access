@@ -9,11 +9,11 @@ function showData() {
     return;
   }
 
-  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),ALLOWED_REGISTRATION_DAYS);
+  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),REGISTRATION_HOURS);
 
-  $next_day = getNextAllowedDay($cur_day,ALLOWED_REGISTRATION_DAYS);
+  $next_day = getNextAllowedDay($cur_day,REGISTRATION_HOURS);
   $end_day = isset($_REQUEST["end"]) ? $_REQUEST["end"] : $next_day;
-  $prev_day = getPrevAllowedDay($cur_day,ALLOWED_REGISTRATION_DAYS);
+  $prev_day = getPrevAllowedDay($cur_day,REGISTRATION_HOURS);
   $today = date("Y-m-d");
 
   $dbh = connectDB();
@@ -122,9 +122,9 @@ function downloadCSV() {
   header("Content-type: text/comma-separated-values");
   header("Content-Disposition: attachment; filename=\"$filename\"");
 
-  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),ALLOWED_REGISTRATION_DAYS);
+  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),REGISTRATION_HOURS);
 
-  $next_day = getNextAllowedDay($cur_day,ALLOWED_REGISTRATION_DAYS);
+  $next_day = getNextAllowedDay($cur_day,REGISTRATION_HOURS);
   $end_day = isset($_REQUEST["end"]) ? $_REQUEST["end"] : $next_day;
 
   $dbh = connectDB();

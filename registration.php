@@ -8,7 +8,7 @@ addSubmitHandler( new SubmitHandler('request_approval','requestApproval') );
 function showRequestForm() {
 
   $slot_minutes = 60;
-  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),ALLOWED_REGISTRATION_DAYS);
+  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),REGISTRATION_HOURS);
 
   $request_id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
   $editing = null;
@@ -25,8 +25,8 @@ function showRequestForm() {
     }
   }
 
-  $next_day = getNextAllowedDay($cur_day,ALLOWED_REGISTRATION_DAYS);
-  $prev_day = getPrevAllowedDay($cur_day,ALLOWED_REGISTRATION_DAYS);
+  $next_day = getNextAllowedDay($cur_day,REGISTRATION_HOURS);
+  $prev_day = getPrevAllowedDay($cur_day,REGISTRATION_HOURS);
   $today = date("Y-m-d");
 
   echo REQUEST_FORM_HEADER;
@@ -202,26 +202,31 @@ function showRequestForm() {
 
   echo "<div id='filter_control' class='disabled'><label><input type='checkbox' name='do_filter' id='do_filter' value='1' checked disabled onchange='updateSlotInfo()'/> filter times and rooms shown below using the data entered above</label></div>\n";
 
-  $min_hour = (int)explode(":",MIN_REGISTRATION_TIME)[0];
-  $max_hour = (int)explode(":",MAX_REGISTRATION_TIME)[0];
-  for( $hour=$min_hour; $hour < $max_hour; $hour++ ) {
-    if( $hour < 12 ) {
-      $hour12 = $hour;
-      $ampm = "am";
-    } else {
-      $hour12 = $hour-12;
-      if( $hour12==0 ) $hour12 = 12;
-      $ampm = "pm";
+  $cur_day_char = getWeekdayChar($cur_day);
+  foreach( REGISTRATION_HOURS as $hours ) {
+    if( strpos($hours['days'],$cur_day_char) === false ) continue;
+    $min_hour = (int)explode(":",$hours['start'])[0];
+    $max_hour = (int)explode(":",$hours['end'])[0];
+
+    for( $hour=$min_hour; $hour < $max_hour; $hour++ ) {
+      if( $hour < 12 ) {
+        $hour12 = $hour;
+        $ampm = "am";
+      } else {
+        $hour12 = $hour-12;
+        if( $hour12==0 ) $hour12 = 12;
+        $ampm = "pm";
+      }
+      echo "<div class='row'>";
+
+      $vname = "slot_{$hour}_0";
+      echo "<div id='{$vname}' class='col-sm'><nobr>{$hour12} {$ampm}</nobr> <span id='{$vname}-summary' class='slot-summary'></span>";
+
+      echo "<div class='slotinfo'></div>";
+      echo "</div>";
+
+      echo "</div>\n";
     }
-    echo "<div class='row'>";
-
-    $vname = "slot_{$hour}_0";
-    echo "<div id='{$vname}' class='col-sm'><nobr>{$hour12} {$ampm}</nobr> <span id='{$vname}-summary' class='slot-summary'></span>";
-
-    echo "<div class='slotinfo'></div>";
-    echo "</div>";
-
-    echo "</div>\n";
   }
 
   # add some whitespace at the bottom to prevent show/hide of elements from jerking around the scroll position on the page
@@ -404,14 +409,9 @@ function saveRequest(&$show) {
   }
 
   if( !ALLOW_REGISTRATION_OUTSIDE_MINMAX ) {
-    $start_hm = date('H:i',$start_time_t);
-    $end_hm = date('H:i',$end_time_t);
-    $min_hm24 = date('H:i',strtotime($cur_day . " " . MIN_REGISTRATION_TIME));
-    $max_hm24 = date('H:i',strtotime($cur_day . " " . MAX_REGISTRATION_TIME));
-    if( $start_hm < $min_hm24 || $end_hm > $max_hm24 ) {
-      $min_hm = date('g:ia',strtotime($cur_day . " " . MIN_REGISTRATION_TIME));
-      $max_hm = date('g:ia',strtotime($cur_day . " " . MAX_REGISTRATION_TIME));
-      echo "<div class='alert alert-danger'>Reservations must be between ",htmlescape($min_hm)," and ",htmlescape($max_hm),". Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+    if( !isAllowedTime($start_time,$end_time,REGISTRATION_HOURS) ) {
+      $allowed_hours = getAllowedTimes($start_time,REGISTRATION_HOURS);
+      echo "<div class='alert alert-danger'>Reservations must be between ",htmlescape($allowed_hours),". Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
       clearRegistrationSubmitVars();
       return;
     }

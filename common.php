@@ -510,29 +510,65 @@ function getDayChar($date_str) {
   return dayNameToChar(date("l",strtotime($date_str)));
 }
 
-function isAllowedDay($date_str,$allowed_days) {
+function isAllowedDay($date_str,$schedule) {
   $day_char = getDayChar($date_str);
-  return strpos($allowed_days,$day_char) !== false;
+  foreach( $schedule as $entry ) {
+    if( strpos($entry['days'],$day_char) !== false ) {
+      return true;
+    }
+  }
+  return false;
 }
 
-function getNextAllowedDay($date_str,$allowed_days) {
+function isAllowedTime($start,$end,$schedule) {
+  $day_char = getDayChar($start);
+  $cur_day = date('Y-m-d',strtotime($start));
+  $start_hm = date('H:i',strtotime($start));
+  $end_hm = date('H:i',strtotime($end));
+  foreach( $schedule as $entry ) {
+    if( strpos($entry['days'],$day_char) !== false ) {
+      $min_hm24 = date('H:i',strtotime($cur_day . " " . $entry['start']));
+      $max_hm24 = date('H:i',strtotime($cur_day . " " . $entry['end']));
+      if( $start_hm >= $min_hm24 && $end_hm <= $max_hm24 ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function getAllowedTimes($day,$schedule) {
+  $day_char = getDayChar($day);
+  $cur_day = date('Y-m-d',strtotime($day));
+  $times = array();
+  foreach( $schedule as $entry ) {
+    if( strpos($entry['days'],$day_char) !== false ) {
+      $min_hm = date('g:ia',strtotime($cur_day . " " . $entry['start']));
+      $max_hm = date('g:ia',strtotime($cur_day . " " . $entry['end']));
+      $times[] = $min_hm . " - " . $max_hm;
+    }
+  }
+  return implode(", ",$times);
+}
+
+function getNextAllowedDay($date_str,$schedule) {
   $d = getNextDay($date_str);
-  return getThisAllowedDayOrNext($d,$allowed_days);
+  return getThisAllowedDayOrNext($d,$schedule);
 }
 
-function getThisAllowedDayOrNext($date_str,$allowed_days) {
+function getThisAllowedDayOrNext($date_str,$schedule) {
   $d = $date_str;
   for($i=0; $i<7; $i++) {
-    if( isAllowedDay($d,$allowed_days) ) return $d;
+    if( isAllowedDay($d,$schedule) ) return $d;
     $d = getNextDay($d);
   }
   return "";
 }
 
-function getPrevAllowedDay($date_str,$allowed_days) {
+function getPrevAllowedDay($date_str,$schedule) {
   $d = getPrevDay($date_str);
   for($i=0; $i<7; $i++) {
-    if( isAllowedDay($d,$allowed_days) ) return $d;
+    if( isAllowedDay($d,$schedule) ) return $d;
     $d = getPrevDay($d);
   }
   return "";
