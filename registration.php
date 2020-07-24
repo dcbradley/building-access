@@ -202,9 +202,8 @@ function showRequestForm() {
 
   echo "<div id='filter_control' class='disabled'><label><input type='checkbox' name='do_filter' id='do_filter' value='1' checked disabled onchange='updateSlotInfo()'/> filter times and rooms shown below using the data entered above</label></div>\n";
 
-  $cur_day_char = getWeekdayChar($cur_day);
-  foreach( REGISTRATION_HOURS as $hours ) {
-    if( strpos($hours['days'],$cur_day_char) === false ) continue;
+  $times = getAllowedTimes24Array($cur_day,REGISTRATION_HOURS);
+  foreach( $times as $hours ) {
     $min_hour = (int)explode(":",$hours['start'])[0];
     $max_hour = (int)explode(":",$hours['end'])[0];
 

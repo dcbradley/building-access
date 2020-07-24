@@ -511,9 +511,21 @@ function getDayChar($date_str) {
 }
 
 function isAllowedDay($date_str,$schedule) {
+  $cur_day = date('Y-m-d',strtotime($date_str));
+  $date_found = false;
+  foreach( $schedule as $entry ) {
+    if( array_key_exists('date',$entry) && $entry['date'] == $cur_day ) {
+      $date_found = true;
+      if( !array_key_exists('start',$entry) ) continue;
+      return true;
+    }
+  }
+  if( $date_found ) return false;
+
   $day_char = getDayChar($date_str);
   foreach( $schedule as $entry ) {
-    if( strpos($entry['days'],$day_char) !== false ) {
+    if( !array_key_exists('start',$entry) ) continue;
+    if( array_key_exists('days',$entry) && strpos($entry['days'],$day_char) !== false ) {
       return true;
     }
   }
@@ -525,8 +537,24 @@ function isAllowedTime($start,$end,$schedule) {
   $cur_day = date('Y-m-d',strtotime($start));
   $start_hm = date('H:i',strtotime($start));
   $end_hm = date('H:i',strtotime($end));
+
+  $date_found = false;
   foreach( $schedule as $entry ) {
-    if( strpos($entry['days'],$day_char) !== false ) {
+    if( array_key_exists('date',$entry) && $entry['date'] == $cur_day ) {
+      $date_found = true;
+      if( !array_key_exists('start',$entry) ) continue;
+      $min_hm24 = date('H:i',strtotime($cur_day . " " . $entry['start']));
+      $max_hm24 = date('H:i',strtotime($cur_day . " " . $entry['end']));
+      if( $start_hm >= $min_hm24 && $end_hm <= $max_hm24 ) {
+        return true;
+      }
+    }
+  }
+  if( $date_found ) return false;
+
+  foreach( $schedule as $entry ) {
+    if( !array_key_exists('start',$entry) ) continue;
+    if( array_key_exists('days',$entry) && strpos($entry['days'],$day_char) !== false ) {
       $min_hm24 = date('H:i',strtotime($cur_day . " " . $entry['start']));
       $max_hm24 = date('H:i',strtotime($cur_day . " " . $entry['end']));
       if( $start_hm >= $min_hm24 && $end_hm <= $max_hm24 ) {
@@ -537,16 +565,42 @@ function isAllowedTime($start,$end,$schedule) {
   return false;
 }
 
-function getAllowedTimes($day,$schedule) {
+function getAllowedTimes24Array($day,$schedule) {
   $day_char = getDayChar($day);
   $cur_day = date('Y-m-d',strtotime($day));
   $times = array();
+
+  $date_found = false;
   foreach( $schedule as $entry ) {
-    if( strpos($entry['days'],$day_char) !== false ) {
-      $min_hm = date('g:ia',strtotime($cur_day . " " . $entry['start']));
-      $max_hm = date('g:ia',strtotime($cur_day . " " . $entry['end']));
-      $times[] = $min_hm . " - " . $max_hm;
+    if( array_key_exists('date',$entry) && $entry['date'] == $cur_day ) {
+      $date_found = true;
+      if( !array_key_exists('start',$entry) ) continue;
+      $min_hm = date('H:i',strtotime($cur_day . " " . $entry['start']));
+      $max_hm = date('H:i',strtotime($cur_day . " " . $entry['end']));
+      $times[] = array('start' => $min_hm, 'end' => $max_hm);
     }
+  }
+
+  if( !$date_found ) foreach( $schedule as $entry ) {
+    if( !array_key_exists('start',$entry) ) continue;
+    if( array_key_exists('days',$entry) && strpos($entry['days'],$day_char) !== false ) {
+      $min_hm = date('H:i',strtotime($cur_day . " " . $entry['start']));
+      $max_hm = date('H:i',strtotime($cur_day . " " . $entry['end']));
+      $times[] = array('start' => $min_hm, 'end' => $max_hm);
+    }
+  }
+  return $times;
+}
+
+function getAllowedTimes($day,$schedule) {
+  $times24 = getAllowedTimes24Array($day,$schedule);
+  $cur_day = date('Y-m-d',strtotime($day));
+
+  $times = array();
+  foreach( $times24 as $entry ) {
+    $min_hm = date('g:ia',strtotime($cur_day . " " . $entry['start']));
+    $max_hm = date('g:ia',strtotime($cur_day . " " . $entry['end']));
+    $times[] = $min_hm . " - " . $max_hm;
   }
   return implode(", ",$times);
 }

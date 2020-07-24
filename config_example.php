@@ -68,6 +68,10 @@ const UNKNOWN_DEPT_DEFAULT_BUILDING = "";
 #  return $room;
 #}
 
+# Specify the times for registration.
+# Special days may be specified by date rather than by day of week.
+# Example: array('date' => '2020-07-24', 'start' => '11:00', 'end' => '14:00')
+# To exclude a date, add an entry for the date but do not specify a start and end time.
 const REGISTRATION_HOURS = array(
   array('days' => 'MTWR','start' => '06:00','end' => '22:00'),
   array('days' => 'F',   'start' => '06:00','end' => '17:00'),
