@@ -114,10 +114,13 @@ const SAFETY_MONITOR_SIGNUP = false;
 # show safety monitor panel on the registration page?
 const SAFETY_MONITOR_PANEL = true;
 
-# array of entries of form:
+# Like REGISTRATION_HOURS, this is an array of arrays of the form:
 # array('days' => day_chars, 'start' => start_time_24h, 'end' => end_time_24h)
 # Example:
 #   array('days' => "MTWR",'start' => "17:00",'end' => "22:00"),
+# Special dates may be specified as
+#   array('date' => '2020-07-24','start' => '13:00','end' => '22:00'),
+# To specify that a date should be excluded, do not specify a start and end time.
 
 const SAFETY_MONITOR_HOURS = array(
 );
