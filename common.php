@@ -27,21 +27,47 @@ function getAdminDepartments() {
 }
 
 function getUserDepartment() {
+
+  # first see if a department has already been recorded for this user
+  $dbh = connectDB();
+  $sql = "SELECT DEPARTMENT FROM building_access WHERE NETID = :NETID ORDER BY ID DESC LIMIT 1";
+  $stmt = $dbh->prepare($sql);
+  $stmt->bindValue(":NETID",REMOTE_USER_NETID);
+  $stmt->execute();
+  $row = $stmt->fetch();
+  if( $row && $row["DEPARTMENT"] ) {
+    return $row["DEPARTMENT"];
+  }
+
+  # next, try looking this person up in ldap
   $cn = getWebUserName();
   list($first, $last) = explode(" ",$cn,2);
   $email = getWebUserEmail();
   $results = getLdapInfo($first,"",$last,$email,REMOTE_USER_NETID);
-  $department = $results && isset($results["department"]) ? $results["department"] : '';
+  $ldap_department = $results && array_key_exists("department",$results) ? $results["department"] : '';
+  $all_departments = $results && array_key_exists("all_departments",$results) ? $results["all_departments"] : array();
 
-  foreach( ALT_DEPARTMENT_NAMES as $alt_department => $alt_names ) {
-    foreach( $alt_names as $alt_name ) {
-      if( strcasecmp($alt_name,$department)==0 ) {
-        return $alt_department;
+  $all_departments = array_merge(array($ldap_department),$all_departments);
+
+  foreach( $all_departments as $this_department ) {
+    if( !$this_department ) continue;
+
+    foreach( DEPARTMENTS as $department ) {
+      if( strcasecmp($department,$this_department)==0 ) {
+        return $department;
+      }
+    }
+
+    foreach( ALT_DEPARTMENT_NAMES as $alt_department => $alt_names ) {
+      foreach( $alt_names as $alt_name ) {
+        if( strcasecmp($alt_name,$this_department)==0 ) {
+          return $alt_department;
+        }
       }
     }
   }
 
-  return $department;
+  return "";
 }
 
 function htmlescape($s) {
