@@ -74,14 +74,19 @@ function showRequestForm() {
   } else {
     $default_department = getUserDepartment();
   }
-  echo "<div class='field-input'>";
-  echo "<select name='department' id='department'>";
-  echo "<option value=''>Choose your department</option>";
-  foreach( DEPARTMENTS as $department ) {
-    $selected = $default_department == $department ? "selected" : "";
-    echo "<option value='",htmlescape($department),"' $selected/>",htmlescape($department),"</option>";
+  if( count(DEPARTMENTS)==1 && $default_department == DEPARTMENTS[0] ) {
+    echo "<input type='hidden' name='department' id='department' value='",htmlescape($default_department),"'/>\n";
   }
-  echo "</select></div>";
+  else {
+    echo "<div class='field-input'>";
+    echo "<select name='department' id='department'>";
+    echo "<option value=''>Choose your department</option>";
+    foreach( DEPARTMENTS as $department ) {
+      $selected = $default_department == $department ? "selected" : "";
+      echo "<option value='",htmlescape($department),"' $selected/>",htmlescape($department),"</option>";
+    }
+    echo "</select></div>";
+  }
 
   echo "<div class='field-title'><label for='purpose'>Purpose</label></div>\n";
   $value = $editing ? $editing["PURPOSE"] : "";
@@ -242,7 +247,7 @@ function showRequestForm() {
     window.addEventListener('load', function () {repeatChanged();});
     function validateInput(only_hide_errors=false) {
       var missing_department = $('#missing_department');
-      if( !$("select[name='department']").val() ) {
+      if( !$("#department").val() ) {
         if( !only_hide_errors ) missing_department.show();
         return false;
       }
