@@ -14,28 +14,54 @@ to work with version 4.1.3).
 Copy config_example.php to config.php and edit it to match your
 situation.
 
+Some optional CSV files may be used to provide information about
+people and rooms.  The order of columns in the CSV file does not
+matter.  Instead, column names in the first line in the CSV file are
+used to determine the contents of each column.  The names are not case
+sensitive, and spaces and underscores may be used interchangeably.
+Columns with unexpected names are simply ignored.  The CSV file names
+are case sensitive (assuming your filesystem is case sensitive).  The
+file names are derived from department or building names with all but
+alphabetic and numeric characters stripped.  Any fields in the CSV
+file that contain commas must be surrounded by double quotes.
+
 Copy approvals/ExampleDepartment.csv to
-approvals/YourDepartmentName.csv and edit.  The department name used
-for the csv file must match the department name in config.php (case
-sensitive) with all characters but alphabetic and numeric stripped.
+approvals/YourDepartmentName.csv and edit.  See the note above about
+CSV naming.  This file specifies who should be automatically approved
+to be in what room.  Required columns are NETID and ROOM.  If you
+don't have NETID, you can use NAME or FIRST and LAST, but matching by
+NETID is better, because name matching relies on some fuzzy rules.  A
+person may be listed more than once.  All entries for the person will
+be used.  A value of * for NETID, NAME, or LAST will match all people.
+The room column may contain a list of rooms separated by commas.
+(Remember that a field containing commas must be surrounded by double
+quotes.)  If you have configured multiple buildings, each room should be
+followed by a space and then a building name or abbreviation.  The
+room * will match any requested room.  The additional columns HOURS
+and DAYS may be included to specify a maximum number of hours per week
+and a specific set of weekdays for which the automatic approval
+applies.
 
 Copy roomcaps/ExampleBuilding.csv to roomcaps/YourBuildingName.csv and
-edit.  The building name used for the csv file must match the building
-name in config.php (case sensitive) with all characters but alphabetic
-and numeric stripped.
+edit.  See the note above about CSV naming.  The required columns are
+ROOM and MAXCAP.  If somebody registeres to be in a room and would
+exceed MAXCAP occupants, the request is not automatically approved.
+An additional column NORMCAP may be specified (default 1).  If
+somebody registers to be in a room and would exceed NORMCAP occupants,
+the request is not rejected, but a warning is displayed to make sure
+they are aware of the unusual situation.  If the DESCRIPTION column is
+provided, the room description will be displayed in any MAXCAP or
+NORMCAP messages.
 
-If needed, copy people/ExampleDepartment.csv to
-people/YourDepartmentName.csv and edit.  This file is only needed if
-shibboleth does not provide a name attribute (cn or givenName and sn)
-or if you are using the safety monitor feature.  All columns but NETID
-are optional.  NAME or FIRST and LAST are used if shibboleth does not
-provide name attributes.  EMAIL is used if shibboleth does not provide
-email attributes (wiscEduMSOLPrimaryAddress or mail).  If a column URL
-is provided, it will be used in place of a wisc.edu search for the
-person when the person is listed as a safety monitor.  The department
-name used for the csv file must match the department name in
-config.php (case sensitive) with all characters but alphabetic and
-numeric stripped.
+Copy people/ExampleDepartment.csv to people/YourDepartmentName.csv and
+edit.  See the above note about CSV naming.  This file is only needed
+if shibboleth does not provide a name attribute (cn or givenName and
+sn) or if you are using the safety monitor feature.  All columns but
+NETID are optional.  NAME or FIRST and LAST are used if shibboleth
+does not provide name attributes.  EMAIL is used if shibboleth does
+not provide email attributes (wiscEduMSOLPrimaryAddress or mail).  If
+a column URL is provided, it will be used in place of a wisc.edu
+search for the person when the person is listed as a safety monitor.
 
 Copy db_example.php to db.php and insert db access parameters.
 
