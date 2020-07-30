@@ -380,11 +380,13 @@ function saveRequest(&$show) {
   $start_time = $cur_day . " " . $_REQUEST["start_time"];
   if( !$start_time ) {
     echo "<div class='alert alert-danger'>Not saved.  A start time was not specified.  Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+    clearRegistrationSubmitVars();
     return; # this should not happen, so just bail out to avoid bad data
   }
   $start_time_t = strtotime($start_time);
   if( $start_time_t === false ) {
     echo "<div class='alert alert-danger'>Not saved.  Invalid start time.  Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+    clearRegistrationSubmitVars();
     return; # this should not happen, so just bail out to avoid bad data
   }
   # ensure standard time form
@@ -393,11 +395,13 @@ function saveRequest(&$show) {
   $end_time = $cur_day . " " . $_REQUEST["end_time"];
   if( !$end_time ) {
     echo "<div class='alert alert-danger'>Not saved.  An end time was not specified.  Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+    clearRegistrationSubmitVars();
     return; # this should not happen, so just bail out to avoid bad data
   }
   $end_time_t = strtotime($end_time);
   if( $end_time_t === false ) {
     echo "<div class='alert alert-danger'>Not saved.  Invalid end time.  Please <button onclick='window.history.back()'>go back</button> and fix. Note that in Safari on a mac, you must enter 24-hour time.</div>\n";
+    clearRegistrationSubmitVars();
     return; # this should not happen, so just bail out to avoid bad data
   }
   # ensure standard time form
@@ -671,9 +675,9 @@ function saveRequest(&$show) {
         $url = SELF_FULL_URL . "?id=" . $dup_id;
         echo "<a href='",htmlescape($url),"'>#",htmlescape($dup_id),"</a> ";
       }
-      echo "</div>\n";
+      echo ". You may wish to <button onclick='window.history.back()'>go back</button> and fix.</div>\n";
       $submission_errors = true;
-      $id = null;
+      clearRegistrationSubmitVars();
     }
   }
 
