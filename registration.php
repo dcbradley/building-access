@@ -238,7 +238,7 @@ function showRequestForm() {
 
   ?><script>
     function repeatChanged() {
-      if( $("input[name='repeat']:checked").val() ) {
+      if( $("#registration_form input[name='repeat']:checked").val() ) {
         $(".repeat-options").show();
       } else {
         $(".repeat-options").hide();
@@ -254,14 +254,14 @@ function showRequestForm() {
       else missing_department.hide();
 
       var missing_room = $('#missing_room');
-      if( !$("input[name='room']").val() ) {
+      if( !$("#registration_form input[name='room']").val() ) {
         if( !only_hide_errors ) missing_room.show();
         return false;
       }
       else missing_room.hide();
 
-      var start_time = $("input[name='start_time']").val();
-      var end_time = $("input[name='end_time']").val();
+      var start_time = $("#start_time").val();
+      var end_time = $("#end_time").val();
 
       var missing_time = $('#missing_time');
       if( !start_time || !end_time ) {
@@ -281,10 +281,10 @@ function showRequestForm() {
     }
     function updateSlotInfo() {
       validateInput(true);
-      var building = $("input[name='building']:checked").val();
-      var room = $("input[name='room']").val();
-      var start_time = $("input[name='start_time']").val();
-      var end_time = $("input[name='end_time']").val();
+      var building = $("#registration_form input[name='building']:checked").val();
+      var room = $("#registration_form input[name='room']").val();
+      var start_time = $("#start_time").val();
+      var end_time = $("#end_time").val();
       if( building || room || start_time || end_time ) {
         $('#filter_control').removeClass('disabled');
         $('#do_filter').attr('disabled',false);
@@ -765,7 +765,7 @@ function saveRequest(&$show) {
   }
 
   if( !$continue_editing_this_request ) {
-    $_REQUEST["id"] = ""; # clear form
+    clearRegistrationSubmitVars();
   }
 }
 
