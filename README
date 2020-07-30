@@ -1,4 +1,4 @@
-This app is used by University of Wisconsin-Madison Physics to
+This app is used by University of Wisconsin-Madison Physics and others to
 coordinate building usage during the COVID-19 dirsuption.
 
 Known to work in Debian 9 under Apache 2.4 with PHP 7.0.33 and MariaDB 10.1.44.
@@ -60,7 +60,7 @@ CREATE TABLE `building_access` (
   `APPROVED_BY` varchar(60) NOT NULL,
   `ADMIN_REASON` varchar(60) NOT NULL,
   `UPDATED` datetime NOT NULL,
-  `DEPARTMENT` varchar(10) NOT NULL,
+  `DEPARTMENT` varchar(60) NOT NULL,
   `REPEAT_PARENT` int(11) NOT NULL,
   `REPEAT_DAYS` varchar(7) NOT NULL,
   `REPEAT_THROUGH` date DEFAULT NULL,
