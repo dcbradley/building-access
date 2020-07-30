@@ -31,7 +31,7 @@ function showRequestForm() {
 
   echo REQUEST_FORM_HEADER;
 
-  if( defined('SAFETY_MONITOR_PANEL') && SAFETY_MONITOR_PANEL ) {
+  if( SAFETY_MONITOR_SIGNUP && defined('SAFETY_MONITOR_PANEL') && SAFETY_MONITOR_PANEL ) {
     echo "<div id='safety-monitor-panel'>\n";
     showSafetyMonitorsForDate($cur_day);
     echo "</div>\n";
