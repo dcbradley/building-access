@@ -39,7 +39,7 @@ function checkAutoApproval(&$why_not_approved,&$warnings,$id,&$request) {
   list($first,$last) = splitName($request["NAME"]);
   foreach( $approvals as $approval ) {
     if( array_key_exists("NETID",$approval) && $approval["NETID"] ) {
-      if( $approval["NETID"] != $request["NETID"] ) {
+      if( $approval["NETID"] != $request["NETID"] && $approval["NETID"] != "*" ) {
         continue;
       }
     }
@@ -50,15 +50,15 @@ function checkAutoApproval(&$why_not_approved,&$warnings,$id,&$request) {
       $room = canonicalRoom($room);
       $room_descr = $room . " " . buildingAbbreviation($request["BUILDING"]);
       foreach( $approval["ROOM"] as $room_building ) {
-        if( $room_building[0] == $room && ($room_building[1] == $request["BUILDING"] || !$room_building[1]) ) {
-          if( $approval["HOURS"] != "" ) {
+        if( ($room_building[0] == $room || $room_building[0] == "*") && ($room_building[1] == $request["BUILDING"] || !$room_building[1]) ) {
+          if( array_key_exists("HOURS",$approval) && $approval["HOURS"] != "" ) {
             $hours_used = getHoursScheduled($request,$room);
             if( $hours_used > 1.0*$approval["HOURS"] ) {
               $why_not_approved[] = "This would exceed the weekly time allotment of " . $approval["HOURS"] . " hours in {$room_descr} (would be " . round($hours_used,2) . " hours used).";
               continue;
             }
           }
-          if( isset($approval["DAYS"]) && $approval["DAYS"] && strpos($approval["DAYS"],$request_day) === false ) {
+          if( array_key_exists("DAYS",$approval) && $approval["DAYS"] && strpos($approval["DAYS"],$request_day) === false ) {
             $why_not_approved[] = date("l",strtotime($request["START_TIME"])) . " is not on the list of pre-approved days in {$room_descr}: " . implode_and(listFullWeekdayNames($approval["DAYS"])) . ".";
             continue;
           }
