@@ -272,6 +272,9 @@ function getApprovals($department) {
         list($first,$last) = splitName($approval["NAME"]);
 	$approval["FIRST"] = $first;
 	$approval["LAST"] = $last;
+	if( $approval["FIRST"] == "" && $approval["LAST"] == "*" ) {
+	  $approval["FIRST"] = "*";
+	}
       }
       $approvals[] = $approval;
     }

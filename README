@@ -32,15 +32,15 @@ to be in what room.  Required columns are NETID and ROOM.  If you
 don't have NETID, you can use NAME or FIRST and LAST, but matching by
 NETID is better, because name matching relies on some fuzzy rules.  A
 person may be listed more than once.  All entries for the person will
-be used.  A value of * for NETID, NAME, or LAST will match all people.
-The room column may contain a list of rooms separated by commas.
-(Remember that a field containing commas must be surrounded by double
-quotes.)  If you have configured multiple buildings, each room should be
-followed by a space and then a building name or abbreviation.  The
-room * will match any requested room.  The additional columns HOURS
-and DAYS may be included to specify a maximum number of hours per week
-and a specific set of weekdays for which the automatic approval
-applies.
+be used.  A value of * for NETID, NAME, or FIRST and LAST will match
+all people.  The room column may contain a list of rooms separated by
+commas.  (Remember that a field containing commas must be surrounded
+by double quotes.)  If you have configured multiple buildings, each
+room should be followed by a space and then a building name or
+abbreviation.  The room * will match any requested room.  The
+additional columns HOURS and DAYS may be included to specify a maximum
+number of hours per week and a specific set of weekdays for which the
+automatic approval applies.
 
 Copy roomcaps/ExampleBuilding.csv to roomcaps/YourBuildingName.csv and
 edit.  See the note above about CSV naming.  The required columns are

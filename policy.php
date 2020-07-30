@@ -43,7 +43,12 @@ function checkAutoApproval(&$why_not_approved,&$warnings,$id,&$request) {
         continue;
       }
     }
-    else if( !nameMatches($first,$last,$approval["FIRST"],$approval["LAST"]) ) {
+    else if( array_key_exists("FIRST",$approval) && array_key_exists("LAST",$approval) && $approval["LAST"] ) {
+      if( !nameMatches($first,$last,$approval["FIRST"],$approval["LAST"]) && !($approval["FIRST"] == "*" && $approval["LAST"] == "*")) {
+        continue;
+      }
+    }
+    else {
       continue;
     }
     foreach( $rooms as $room ) {
