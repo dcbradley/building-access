@@ -16,23 +16,26 @@ situation.
 
 Copy approvals/ExampleDepartment.csv to
 approvals/YourDepartmentName.csv and edit.  The department name used
-for the csv file must match the department name in config.php with all
-characters but alphabetic and numeric stripped.
+for the csv file must match the department name in config.php (case
+sensitive) with all characters but alphabetic and numeric stripped.
 
 Copy roomcaps/ExampleBuilding.csv to roomcaps/YourBuildingName.csv and
 edit.  The building name used for the csv file must match the building
-name in config.php with all characters but alphabetic and numeric
-stripped.
+name in config.php (case sensitive) with all characters but alphabetic
+and numeric stripped.
 
-Copy people/ExampleDepartment.csv to people/YourDepartmentName.csv and
-edit.  This file is currently only used for listing people who are
-approved to act as safety monitors, so if you aren't using that
-feature, there is no need to configure this file.  All columns but
-NETID are optional.  If a column URL is provided, it will be used in
-place of a wisc.edu search for the person when the person is listed as
-a safety monitor.  The department name used for the csv file must
-match the department name in config.php with all characters but
-alphabetic and numeric stripped.
+If needed, copy people/ExampleDepartment.csv to
+people/YourDepartmentName.csv and edit.  This file is only needed if
+shibboleth does not provide a name attribute (cn or givenName and sn)
+or if you are using the safety monitor feature.  All columns but NETID
+are optional.  NAME or FIRST and LAST are used if shibboleth does not
+provide name attributes.  EMAIL is used if shibboleth does not provide
+email attributes (wiscEduMSOLPrimaryAddress or mail).  If a column URL
+is provided, it will be used in place of a wisc.edu search for the
+person when the person is listed as a safety monitor.  The department
+name used for the csv file must match the department name in
+config.php (case sensitive) with all characters but alphabetic and
+numeric stripped.
 
 Copy db_example.php to db.php and insert db access parameters.
 

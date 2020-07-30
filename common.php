@@ -95,7 +95,14 @@ function getWebUserName() {
   if( array_key_exists("givenName",$_SERVER) && array_key_exists("sn",$_SERVER) ) {
     return fixNameCase($_SERVER["givenName"]) . " " . fixNameCase($_SERVER["sn"]);
   }
-  return $_SERVER["REMOTE_USER"];
+  $person_info = getPersonInfo(REMOTE_USER_NETID);
+  if( array_key_exists("NAME",$person_info) ) {
+    return $person_info["NAME"];
+  }
+  if( array_key_exists("FIRST",$person_info) && array_key_exists("LAST",$person_info) ) {
+    return $person_info["FIRST"] . " " . $person_info["LAST"];
+  }
+  return REMOTE_USER_NETID;
 }
 
 function getWebUserEmail() {
@@ -105,7 +112,11 @@ function getWebUserEmail() {
   if( array_key_exists("mail",$_SERVER) ) {
     return strtolower($_SERVER["mail"]);
   }
-  return $_SERVER["REMOTE_USER"] . "@wisc.edu";
+  $person_info = getPersonInfo(REMOTE_USER_NETID);
+  if( array_key_exists("EMAIL",$person_info) ) {
+    return $person_info["EMAIL"];
+  }
+  return REMOTE_USER_NETID . "@wisc.edu";
 }
 
 function buildingAbbreviation($building) {
@@ -700,14 +711,25 @@ function loadPeople($department) {
 }
 
 function loadPersonInfo($netid,$department) {
-  $people = loadPeople($department);
-  if( array_key_exists($netid,$people) ) {
-    return $people[$netid];
+  if( !$department ) {
+    foreach( DEPARTMENTS as $dept ) {
+      if( !$dept ) continue;
+      $people = loadPeople($dept);
+      if( array_key_exists($netid,$people) ) {
+        return $people[$netid];
+      }
+    }
+  }
+  else {
+    $people = loadPeople($department);
+    if( array_key_exists($netid,$people) ) {
+      return $people[$netid];
+    }
   }
   return array("NETID" => $netid, "DEPARTMENT" => $department);
 }
 
-function getPersonInfo($netid,$name,$email,$department) {
+function getPersonInfo($netid,$name=null,$email=null,$department=null) {
   static $cached_person_info = array();
   if( array_key_exists($netid,$cached_person_info) ) {
     return $cached_person_info[$netid];
