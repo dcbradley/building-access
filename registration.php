@@ -353,13 +353,15 @@ function showRequestForm() {
 }
 
 function clearRegistrationSubmitVars() {
-  foreach( $_REQUEST as $var => $value ) {
-    if( $var == "s" ) continue;
-    unset($_REQUEST[$var]);
-  }
+  # preserve the page to be shown and the selected day
+  static $preserve = array("s","day");
   foreach( $_POST as $var => $value ) {
-    if( $var == "s" ) continue;
+    if( in_array($var,$preserve) ) continue;
     unset($_POST[$var]);
+  }
+  foreach( $_REQUEST as $var => $value ) {
+    if( in_array($var,$preserve) ) continue;
+    unset($_REQUEST[$var]);
   }
 }
 
