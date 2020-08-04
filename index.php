@@ -1,8 +1,8 @@
 <?php
   ini_set('display_errors', 'On');
 
-  $website_title = "Marauder’s Mapp";
-  $page_title = "Marauder’s Mapp";
+  $website_title = "Marauder’s Map";
+  $page_title = "Marauder’s Map";
 
   $show = isset($_REQUEST["s"]) ? $_REQUEST["s"] : "";
 
