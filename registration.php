@@ -893,6 +893,13 @@ function requestApproval(&$show) {
     return;
   }
 
+  if( $request['START_TIME'] ) {
+    # preserve the selected date
+    $day = date('Y-m-d',strtotime($request['START_TIME']));
+    $_POST["day"] = $day;
+    $_REQUEST["day"] = $day;
+  }
+
   $children = array();
   if( $request['REPEAT_PARENT'] ) {
     $sql = "SELECT * FROM building_access WHERE NETID = :NETID AND REPEAT_PARENT = :REPEAT_PARENT AND START_TIME >= :START_TIME AND APPROVED = '" . INITIALIZING_APPROVAL . "' ORDER BY START_TIME";
