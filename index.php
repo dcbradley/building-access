@@ -1,14 +1,12 @@
 <?php
   ini_set('display_errors', 'On');
 
-  $website_title = "Marauder’s Map";
-  $page_title = "Marauder’s Map";
-
   $show = isset($_REQUEST["s"]) ? $_REQUEST["s"] : "";
 
   require_once "db.php";
   require_once "common.php";
   require_once "config.php";
+  require_once "post_config.php";
   require_once "people_ldap.php";
   require_once "policy.php";
   require_once "registration.php";
@@ -33,7 +31,7 @@
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   <link rel="stylesheet" href="<?php echo WEB_APP_TOP ?>bootstrap/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"/>
   <link href="<?php echo WEB_APP_TOP ?>style.css" rel="stylesheet" type="text/css"/>
-  <title><?php echo $website_title ?></title>
+  <title><?php echo WEB_APP_TITLE ?></title>
 </head>
 <body>
 
@@ -76,13 +74,12 @@ if( !REMOTE_USER_NETID ) {
 <?php
 
 function showNavbar($show) {
-  global $page_title;
   global $user_menu;
   global $admin_menu;
 
 ?>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-      <span class="navbar-brand" href="#"><img src="<?php echo WEB_APP_TOP ?>uwcrest_web_sm.png" height="30" class="d-inline-block align-top" alt="UW"> <?php echo $page_title ?></span>
+      <span class="navbar-brand" href="#"><img src="<?php echo WEB_APP_TOP ?>uwcrest_web_sm.png" height="30" class="d-inline-block align-top" alt="UW"> <?php echo WEB_APP_TITLE ?></span>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>

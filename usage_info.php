@@ -3,6 +3,7 @@
 require_once "db.php";
 require_once "common.php";
 require_once "config.php";
+require_once "post_config.php";
 
 if( !defined('ORGANIZE_RESERVATIONS_BY_FLOOR') || ORGANIZE_RESERVATIONS_BY_FLOOR ) {
   $organize_reservations_by_floor = true;
