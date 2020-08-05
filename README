@@ -34,13 +34,15 @@ NETID is better, because name matching relies on some fuzzy rules.  A
 person may be listed more than once.  All entries for the person will
 be used.  A value of * for NETID, NAME, or FIRST and LAST will match
 all people.  The room column may contain a list of rooms separated by
-commas.  (Remember that a field containing commas must be surrounded
-by double quotes.)  If you have configured multiple buildings, each
-room should be followed by a space and then a building name or
-abbreviation.  The room * will match any requested room.  The
-additional columns HOURS and DAYS may be included to specify a maximum
-number of hours per week and a specific set of weekdays for which the
-automatic approval applies.
+commas.  (Remember that if you are creating the CSV file in a text
+editor, a field containing commas must be surrounded by double
+quotes.)  If you have configured multiple buildings, each room should
+be followed by a space and then a building name or abbreviation.  The
+room * will match any requested room.  The additional columns HOURS
+and DAYS may be included to specify a maximum number of hours per week
+and a specific set of weekdays for which the automatic approval
+applies.  Days are specified as a string of characters from the set
+U, M, T, W, R, F, S for Sunday through Saturday respectively.
 
 Copy roomcaps/ExampleBuilding.csv to roomcaps/YourBuildingName.csv and
 edit.  See the note above about CSV naming.  The required columns are
@@ -62,6 +64,9 @@ does not provide name attributes.  EMAIL is used if shibboleth does
 not provide email attributes (wiscEduMSOLPrimaryAddress or mail).  If
 a column URL is provided, it will be used in place of a wisc.edu
 search for the person when the person is listed as a safety monitor.
+If the column SAFETY_MONITOR is present and set to Y, the person
+will be allowed to sign up to be a safety monitor if that feature
+is enabled in config.php.
 
 Copy db_example.php to db.php and insert db access parameters.
 
