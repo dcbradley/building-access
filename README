@@ -1,5 +1,8 @@
-This app is used by University of Wisconsin-Madison Physics and others to
-coordinate building usage during the COVID-19 dirsuption.
+This app is used by University of Wisconsin-Madison Physics and others
+to coordinate building usage during the COVID-19 dirsuption.  Capacity
+limits may be configured per-room and/or per-floor.  Specific people
+may be authorized to register to be in a building or room, or manual
+administrative approval of registrations may be used.
 
 Known to work in Debian 9 under Apache 2.4 with PHP 7.0.33 and MariaDB 10.1.44.
 
