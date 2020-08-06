@@ -93,7 +93,7 @@ const REQUEST_FORM_HEADER = "
   administration, so please plan ahead.</p>
 
   <p>Before entering the building, you must complete <a
-  href='https://go.wisc.edu/jf993f'>COVID-19 Safety Training</a>.  See
+  href='https://hr.wisc.edu/covid19/workplace-training/'>COVID-19 Safety Training</a>.  See
   also <a href='ResearchRestartPIMessage.pdf'>L&amp;S Research Restart
   Message</a> and <a href='BuildingGuidelines.pdf'>Guidelines for
   working in Chamberlin and Sterling Hall</a>.</p> ";
