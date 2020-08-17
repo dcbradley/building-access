@@ -9,6 +9,7 @@
   require_once "post_config.php";
   require_once "people_ldap.php";
   require_once "policy.php";
+  require_once "about.php";
   require_once "registration.php";
   require_once "approval.php";
   require_once "show_data.php";
