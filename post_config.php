@@ -24,5 +24,8 @@ department IT people may be the best contacts.  If you have questions
 about installing, configuring, or modifying this app to make it suit
 your purposes, you may wish to contact <a
 href='mailto:dan@physics.wisc.edu'>Dan Bradley</a>.</p>
+
+<p><a class='btn btn-primary' href='" . SELF_FULL_URL . "'>Back to Registration Form</a></p>
+
 ");
 }
