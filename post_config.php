@@ -7,7 +7,7 @@ if( !defined('WEB_APP_TITLE') ) {
 if( !defined('ABOUT_PAGE') ) {
   define('ABOUT_PAGE',"
 
-<p>This web app is being used by some departments to schedule access
+<p>This web app is being used by some departments to coordinate access
 to spaces in buildings during the COVID-19 pandemic.  The name
 Marauder’s Map is intended to be whimsical.  It is certainly not
 intended to make anyone feel disrespected.  We affirm our enthusiastic
