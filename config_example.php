@@ -1,16 +1,16 @@
 <?php
 
 const DEPT_ADMINS = array(
-  "Physics"   => array("dcbradley","srdasu","anlefkow"),
-  "Astronomy" => array("sheinz","sjanderson3"),
+  "Astronomy" => array("netid1","netid2"),
+  "Physics"   => array("netid1","netid3","netid4"),
 );
 
 const DEPT_ADMIN_EMAILS = array(
-  "Astronomy"                  => "heinzs@astro.wisc.edu,dan@physics.wisc.edu",
-  "Gender and Women's Studies" => "dan@physics.wisc.edu",
-  "Mathematics"                => "dan@physics.wisc.edu",
-  "Physics"                    => "dasu@hep.wisc.edu,lefkow@hep.wisc.edu,dan@physics.wisc.edu",
-  "Survey Center"              => "dan@physics.wisc.edu",
+  "Astronomy"                  => "example1@wisc.edu,example2@wisc.edu",
+  "Gender and Women's Studies" => "example1@wisc.edu",
+  "Mathematics"                => "example1@wisc.edu",
+  "Physics"                    => "example1@wisc.edu,example3@wisc.edu,example4@wisc.edu",
+  "Survey Center"              => "example1@wisc.edu",
 );
 
 const FROM_NAME = "Building Access Registrations";
