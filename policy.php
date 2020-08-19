@@ -108,7 +108,7 @@ function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
   $dbh = connectDB();
   $sql = "
     SELECT
-      START_TIME, END_TIME, NAME
+      START_TIME, END_TIME, NAME, NETID, ROOM, BUILDING
     FROM building_access
     WHERE
       START_TIME < :END_TIME
@@ -165,7 +165,7 @@ function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
   $dbh = connectDB();
   $sql = "
     SELECT
-      START_TIME, END_TIME, NAME
+      START_TIME, END_TIME, NAME, NETID, ROOM, BUILDING
     FROM building_access
     WHERE
       START_TIME < :END_TIME
@@ -222,8 +222,16 @@ function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
 
 function conflictDesc($overlaps) {
   $overlap_names = array();
+  $invisible_occupants = 0;
   foreach( $overlaps as $overlap ) {
-    $overlap_names[] = $overlap['NAME'];
+    if( isVisible($overlap['NETID'],$overlap['ROOM'],$overlap['BUILDING']) ) {
+      $overlap_names[] = $overlap['NAME'];
+    } else {
+      $invisible_occupants += 1;
+    }
+  }
+  if( $invisible_occupants > 0 ) {
+    $overlap_names[] = "{$invisible_occupants} anonymous occupant" . ($invisible_occupants > 1 ? "s" : "");
   }
   $conflicts = implode_and($overlap_names);
   $s_are = count($overlap_names)==1 ? " is" : "s are";

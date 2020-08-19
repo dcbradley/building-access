@@ -761,6 +761,31 @@ function getPersonInfo($netid,$name=null,$email=null,$department=null) {
   return $person_info;
 }
 
+
+function isVisible($netid,$room,$building) {
+  if( !array_key_exists($building,BUILDING_VISIBILITY_MANIFEST_GROUP) ) {
+    return true;
+  }
+  if( $netid == REMOTE_USER_NETID ) {
+    return true;
+  }
+  $visibility_groups = BUILDING_VISIBILITY_MANIFEST_GROUP[$building];
+  $member_of = array_key_exists("isMemberOf",$_SERVER) ? $_SERVER["isMemberOf"] : "";
+  $member_of = explode(";",$member_of);
+  if( !is_array($visibility_groups) ) {
+    if( in_array($visibility_groups,$member_of) ) {
+      return true;
+    }
+  } else {
+    foreach( $visibility_groups as $group ) {
+      if( in_array($group,$member_of) ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 class MenuEntry {
   public $tag;
   public $label;

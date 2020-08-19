@@ -1,5 +1,7 @@
 <?php
 
+# Override stuff in here by defining these variables in your config.php.
+
 if( !defined('WEB_APP_TITLE') ) {
   define('WEB_APP_TITLE',"Marauder’s Map");
 }
@@ -28,4 +30,8 @@ href='mailto:dan@physics.wisc.edu'>Dan Bradley</a>.</p>
 <p><a class='btn btn-primary' href='" . SELF_FULL_URL . "'>Back to Registration Form</a></p>
 
 ");
+}
+
+if( !defined('BUILDING_VISIBILITY_MANIFEST_GROUP') ) {
+  define('BUILDING_VISIBILITY_MANIFEST_GROUP',array());
 }

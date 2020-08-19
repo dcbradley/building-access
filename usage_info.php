@@ -132,6 +132,7 @@ for( $hour=0; $hour < 24; $hour++ ) {
       $extra_info = $status;
       if( $extra_info ) $extra_info .= ": ";
       $extra_info .= $timespan;
+      $invisible_extra_info = $extra_info;
       if( $extra_info ) $extra_info .= " ";
       $extra_info .= $purpose;
 
@@ -165,7 +166,12 @@ for( $hour=0; $hour < 24; $hour++ ) {
 
           if( !matchRoom($filter_room_regex,$this_floor_rooms) ) continue;
           $this_floor_rooms = implode(",",$this_floor_rooms);
-          $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . ": " . $building . " " . $this_floor_rooms) . "</span> ";
+	  $occupant = htmlescape($row["NAME"]) . " ";
+	  if( !isVisible($row["NETID"],$room,$row["BUILDING"]) ) {
+	    $occupant = "<i class='fas fa-shoe-prints'></i>";
+	    $extra_info = $invisible_extra_info;
+	  }
+          $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . $occupant . htmlescape(" " . $building . " " . $this_floor_rooms) . "</span> ";
 
           if( !array_key_exists($floor,$slotinfo_floor) ) {
             $slotinfo_floor[$floor] = array();

@@ -56,6 +56,30 @@ const DEPT_DEFAULT_BUILDING = array(
 
 const UNKNOWN_DEPT_DEFAULT_BUILDING = "";
 
+# Optional manifest group that specifies who can see the names of
+# occupants in a building.  If no group is specified for a building,
+# this configuration setting does not limit visibility.  Multiple
+# groups may be listed for a building by using an array of strings
+# rather than a single string; if the viewer does not match any
+# group, visibility is restricted.  Note that people can always
+# see their own name.
+#
+# The manifest groups must be linked to shibboleth on your website.
+# See https://kb.wisc.edu/26440 for tips on how to set that up.
+# See https://kb.wisc.edu/30150 for tips on how to use UDDS employee
+# lists in manifest groups.  Note that existing shibboleth sessions do
+# not get updated when you change the manifest configuration.
+#
+# Note that if you wish to restrict access to the form altogether
+# rather than just anonymizing occupants, you can add an entry in
+# .htaccess of the form:
+# require shib-attr isMemberOf <your manifest group>
+
+const BUILDING_VISIBILITY_MANIFEST_GROUP = array(
+  "Chamberlin" => "uw:domain:physics.wisc.edu:chamberlin_occupants",
+  "Sterling" => "uw:domain:physics.wisc.edu:sterling_occupants",
+);
+
 # Optional function to rewrite rooms to canonical form.
 # This is useful if there is more than one name for a room.
 # Rewriting all the different names to one official name will allow room capacity policy to work.
