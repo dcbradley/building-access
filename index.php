@@ -30,7 +30,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-  <link rel="stylesheet" href="<?php echo WEB_APP_TOP ?>bootstrap/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"/>
+  <link rel="stylesheet" href="<?php echo WEB_APP_TOP ?>bootstrap/css/bootstrap.min.css"/>
   <link href="<?php echo WEB_APP_TOP ?>style.css" rel="stylesheet" type="text/css"/>
   <title><?php echo WEB_APP_TITLE ?></title>
 </head>
