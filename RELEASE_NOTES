@@ -1,0 +1,2 @@
+
+* Allow the About page to be disabled by configuring ABOUT_PAGE = null.
