@@ -1,4 +1,9 @@
 
-* Make it clear that the app title can changed by setting WEB_APP_TITLE in config.php.
+* Make it clear that the app title can changed by setting
+  WEB_APP_TITLE in config.php.
 
-* Allow the About page to be disabled by configuring ABOUT_PAGE = null.
+* Allow the About page to be disabled by configuring ABOUT_PAGE =
+  null.
+
+* Allow occupants to be anonymized based on manifest group membership.
+  See BUILDING_VISIBILITY_MANIFEST_GROUP in config_example.php.
