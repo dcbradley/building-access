@@ -66,9 +66,18 @@ const UNKNOWN_DEPT_DEFAULT_BUILDING = "";
 #
 # The manifest groups must be linked to shibboleth on your website.
 # See https://kb.wisc.edu/26440 for tips on how to set that up.
-# See https://kb.wisc.edu/30150 for tips on how to use UDDS employee
-# lists in manifest groups.  Note that existing shibboleth sessions do
-# not get updated when you change the manifest configuration.
+# Basically, just create a new group and paste the shibboleth entityID
+# into the SAML2 entity ID field under Advanced Options.  See
+# https://kb.wisc.edu/30150 for tips on how to use UDDS employee lists
+# in manifest groups.  An example: create a group and then after
+# clicking Add Members, enter something like
+# uw:ref:hr_system:job:current:udds:A:A48:A4812:all_A4812 in the 'Add
+# group member' field.  Wait a minute for the spinny thing to stop
+# spinning, then select the group from the drop-down list that
+# appears, and then click Save.  Note that existing shibboleth
+# sessions do not get updated when you change the manifest
+# configuration.  It can also take a few minutes for changed manifest
+# configuration to take effect even for newly created sessions.
 #
 # Note that if you wish to restrict access to the form altogether
 # rather than just anonymizing occupants, you can add an entry in
