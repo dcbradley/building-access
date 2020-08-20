@@ -1,5 +1,11 @@
 <?php
 
+const WEB_APP_TITLE = "Building Access";
+
+# To disable the About page, you can set it to null.
+# Otherwise, set it to a string containing the HTML that you want displayed.
+# const ABOUT_PAGE = null
+
 const DEPT_ADMINS = array(
   "Astronomy" => array("netid1","netid2"),
   "Physics"   => array("netid1","netid3","netid4"),
