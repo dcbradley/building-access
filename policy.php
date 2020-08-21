@@ -160,7 +160,7 @@ function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
 
 function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
 
-  if( !BUILDING_FLOOR_MAX_CAP ) return true;
+  if( !BUILDING_FLOOR_MAX_CAP || !array_key_exists($request['BUILDING'],BUILDING_FLOOR_MAX_CAP) ) return true;
 
   $dbh = connectDB();
   $sql = "
