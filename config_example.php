@@ -4,6 +4,7 @@ const WEB_APP_TITLE = "Building Access";
 
 # To disable the About page, you can set it to null.
 # Otherwise, set it to a string containing the HTML that you want displayed.
+# See post_config.php for the default value.
 # const ABOUT_PAGE = null
 
 const DEPT_ADMINS = array(
@@ -145,7 +146,9 @@ function PARSE_ROOM_BUILDING($input_room,$department,&$room,&$building) {
 }
 
 # max capacity per floor
-const BUILDING_FLOOR_MAX_CAP = null;
+const BUILDING_FLOOR_MAX_CAP = array(
+  "Chamberlin" => array("1" => 10, "default" => 30),
+);
 
 # show safety monitor signup page?
 const SAFETY_MONITOR_SIGNUP = false;
