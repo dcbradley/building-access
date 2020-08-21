@@ -96,6 +96,17 @@ const BUILDING_VISIBILITY_MANIFEST_GROUP = array(
   "Sterling" => "uw:domain:physics.wisc.edu:sterling_occupants",
 );
 
+# Whether people's names should be hidden by default or not.
+# When private, names are only shown to administrators of the app.
+const DEFAULT_PRIVACY = false;
+
+# Whether a checkbox should be displayed allowing people to override
+# the default privacy setting.  If you are using an old database
+# schema, you should not set this to true until you have added a
+# PRIVACY column.  Example mysql command:
+# alter table building_access add column PRIVACY char(1) not null default '';
+const USER_SETTABLE_PRIVACY = false;
+
 # Optional function to rewrite rooms to canonical form.
 # This is useful if there is more than one name for a room.
 # Rewriting all the different names to one official name will allow room capacity policy to work.

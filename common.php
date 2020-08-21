@@ -762,11 +762,20 @@ function getPersonInfo($netid,$name=null,$email=null,$department=null) {
 }
 
 
-function isVisible($netid,$room,$building) {
-  if( !array_key_exists($building,BUILDING_VISIBILITY_MANIFEST_GROUP) ) {
+function isVisible($netid,$room,$building,$department,$privacy) {
+  if( $netid == REMOTE_USER_NETID ) {
     return true;
   }
-  if( $netid == REMOTE_USER_NETID ) {
+  if( in_array($department,getAdminDepartments()) ) {
+    return true;
+  }
+  $privacy = resolvePrivacy($privacy);
+  if( $privacy == PRIVACY_CODE_YES ) {
+    return false;
+  }
+
+  # finally, check building visibility manifest group, if any
+  if( !array_key_exists($building,BUILDING_VISIBILITY_MANIFEST_GROUP) ) {
     return true;
   }
   $visibility_groups = BUILDING_VISIBILITY_MANIFEST_GROUP[$building];
@@ -784,6 +793,30 @@ function isVisible($netid,$room,$building) {
     }
   }
   return false;
+}
+
+const PRIVACY_CODE_YES = 'Y';
+const PRIVACY_CODE_NO = 'N';
+const PRIVACY_CODE_DEFAULT = 'D';
+
+function resolvePrivacy($privacy) {
+  if( $privacy == "" || $privacy == PRIVACY_CODE_DEFAULT ) {
+    $privacy = DEFAULT_PRIVACY;
+  }
+  if( $privacy === true ) {
+    return PRIVACY_CODE_YES;
+  }
+  if( $privacy === false ) {
+    return PRIVACY_CODE_NO;
+  }
+  return $privacy;
+}
+
+function getPrivacy($db_record) {
+  if( USER_SETTABLE_PRIVACY ) {
+    return $db_record['PRIVACY'];
+  }
+  return PRIVACY_CODE_DEFAULT;
 }
 
 class MenuEntry {

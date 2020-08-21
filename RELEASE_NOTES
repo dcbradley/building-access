@@ -1,3 +1,8 @@
+* Added configuration settings DEFAULT_PRIVACY (default false) and
+  USER_SETTABLE_PRIVACY (default false).  If USER_SETTABLE_PRIVACY
+  is set to true, a column needs to be added to the
+  database.  Example mysql command:
+  alter table building_access add column PRIVACY char(1) not null default '';
 
 * Make it clear that the app title can changed by setting
   WEB_APP_TITLE in config.php.

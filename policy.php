@@ -105,10 +105,12 @@ function checkAutoApprovalAndRoomCap(&$why_not_approved,&$warnings,$id,&$request
 
 function checkRoomCaps(&$why_not_approved,&$warnings,$request) {
 
+  $privacy_sql = USER_SETTABLE_PRIVACY ? "PRIVACY," : "";
+
   $dbh = connectDB();
   $sql = "
     SELECT
-      START_TIME, END_TIME, NAME, NETID, ROOM, BUILDING
+      START_TIME, END_TIME, NAME, NETID, ROOM, BUILDING, {$privacy_sql} DEPARTMENT
     FROM building_access
     WHERE
       START_TIME < :END_TIME
@@ -162,10 +164,12 @@ function checkFloorCaps(&$why_not_approved,&$warnings,$request) {
 
   if( !BUILDING_FLOOR_MAX_CAP || !array_key_exists($request['BUILDING'],BUILDING_FLOOR_MAX_CAP) ) return true;
 
+  $privacy_sql = USER_SETTABLE_PRIVACY ? "PRIVACY," : "";
+
   $dbh = connectDB();
   $sql = "
     SELECT
-      START_TIME, END_TIME, NAME, NETID, ROOM, BUILDING
+      START_TIME, END_TIME, NAME, NETID, ROOM, BUILDING, {$privacy_sql} DEPARTMENT
     FROM building_access
     WHERE
       START_TIME < :END_TIME
@@ -224,7 +228,7 @@ function conflictDesc($overlaps) {
   $overlap_names = array();
   $invisible_occupants = 0;
   foreach( $overlaps as $overlap ) {
-    if( isVisible($overlap['NETID'],$overlap['ROOM'],$overlap['BUILDING']) ) {
+    if( isVisible($overlap['NETID'],$overlap['ROOM'],$overlap['BUILDING'],$overlap['DEPARTMENT'],getPrivacy($overlap)) ) {
       $overlap_names[] = $overlap['NAME'];
     } else {
       $invisible_occupants += 1;

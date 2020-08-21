@@ -167,7 +167,7 @@ for( $hour=0; $hour < 24; $hour++ ) {
           if( !matchRoom($filter_room_regex,$this_floor_rooms) ) continue;
           $this_floor_rooms = implode(",",$this_floor_rooms);
 	  $occupant = htmlescape($row["NAME"]) . " ";
-	  if( !isVisible($row["NETID"],$room,$row["BUILDING"]) ) {
+	  if( !isVisible($row["NETID"],$room,$row["BUILDING"],$row["DEPARTMENT"],getPrivacy($row)) ) {
 	    $occupant = "<i class='fas fa-shoe-prints'></i>";
 	    $extra_info = $invisible_extra_info;
 	  }

@@ -172,6 +172,25 @@ function showRequestForm() {
     echo "<label><input type='radio' name='apply_to_repeats' value='0' /> apply changes to this time block only</label></div>\n";
   }
 
+  if( USER_SETTABLE_PRIVACY ) {
+    echo "<div class='field-input'>\n";
+    if( $editing ) {
+      $last_privacy = getPrivacy($editing);
+    } else {
+      $sql = "SELECT PRIVACY FROM building_access WHERE NETID = :NETID ORDER BY REQUESTED DESC LIMIT 1";
+      $dbh = connectDB();
+      $privacy_stmt = $dbh->prepare($sql);
+      $privacy_stmt->bindValue(':NETID',REMOTE_USER_NETID);
+      $privacy_stmt->execute();
+      $privacy_record = $privacy_stmt->fetch();
+
+      $last_privacy = $privacy_record ? getPrivacy($privacy_record) : PRIVACY_CODE_DEFAULT;
+    }
+    $checked = resolvePrivacy($last_privacy) == PRIVACY_CODE_YES ? "checked" : "";
+    echo "<label><input type='checkbox' name='privacy' value='1' $checked/> in the occupancy list, only show my name to administrators of this app</label>\n";
+    echo "</div>\n";
+  }
+
   echo "<div id='missing_department' class='alert alert-danger' style='display: none'>Please select your department.</div>\n";
   echo "<div id='missing_room' class='alert alert-danger' style='display: none'>You must specify a room.</div>\n";
   echo "<div id='missing_time' class='alert alert-danger' style='display: none'>You must specify a starting and ending time.</div>\n";
@@ -427,6 +446,12 @@ function saveRequest(&$show) {
     }
   }
 
+  if( USER_SETTABLE_PRIVACY ) {
+    $privacy_sql = "PRIVACY = :PRIVACY,";
+  } else {
+    $privacy_sql = "";
+  }
+
   $dbh = connectDB();
   $approved = '';
   if( isset($_REQUEST["id"]) ) {
@@ -489,6 +514,7 @@ function saveRequest(&$show) {
         START_TIME = :START_TIME,
         END_TIME = :END_TIME,
         SAFETY_MONITOR = :SAFETY_MONITOR,
+        {$privacy_sql}
         REPEAT_DAYS = :REPEAT_DAYS,
         REPEAT_THROUGH = :REPEAT_THROUGH
       WHERE
@@ -512,6 +538,7 @@ function saveRequest(&$show) {
       START_TIME = :START_TIME,
       END_TIME = :END_TIME,
       SAFETY_MONITOR = :SAFETY_MONITOR,
+      {$privacy_sql}
       APPROVED = :INITIALIZING_APPROVAL,
       REPEAT_DAYS = :REPEAT_DAYS,
       REPEAT_THROUGH = :REPEAT_THROUGH
@@ -538,6 +565,15 @@ function saveRequest(&$show) {
     $safety_monitor = '';
   }
   $stmt->bindValue(":SAFETY_MONITOR",$safety_monitor);
+
+  if( USER_SETTABLE_PRIVACY ) {
+    $privacy = array_key_exists("privacy",$_REQUEST) && $_REQUEST["privacy"] ? PRIVACY_CODE_YES : PRIVACY_CODE_NO;
+    if( $privacy == resolvePrivacy(PRIVACY_CODE_DEFAULT) ) {
+      # record the user's choice as 'default', so the admin can change the default retroactively
+      $privacy = PRIVACY_CODE_DEFAULT;
+    }
+    $stmt->bindValue(":PRIVACY",$privacy);
+  }
 
   $purpose = $_REQUEST["purpose"];
   $stmt->bindValue(":PURPOSE",$purpose);

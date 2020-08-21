@@ -152,6 +152,9 @@ function downloadCSV() {
   $row[] = "Approved By";
   $row[] = "Approved Time";
   $row[] = "Deny Reason";
+  if( USER_SETTABLE_PRIVACY ) {
+    $row[] = "Privacy";
+  }
   fputcsv($F,$row);
 
   while( ($db_row=$stmt->fetch()) ) {
@@ -191,6 +194,10 @@ function downloadCSV() {
     $csv_row[] = $db_row['APPROVED_BY'];
     $csv_row[] = $db_row['APPROVED_TIME'];
     $csv_row[] = $db_row['ADMIN_REASON'];
+    if( USER_SETTABLE_PRIVACY ) {
+      $privacy = resolvePrivacy($db_row['PRIVACY']);
+      $csv_row[] = $privacy;
+    }
 
     fputcsv($F,$csv_row);
   }
