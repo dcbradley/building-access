@@ -1,3 +1,5 @@
+* Added occupancy map on the administrative approval page.
+
 * Added configuration settings DEFAULT_PRIVACY (default false) and
   USER_SETTABLE_PRIVACY (default false).  If USER_SETTABLE_PRIVACY
   is set to true, a column needs to be added to the

@@ -13,6 +13,7 @@
   require_once "registration.php";
   require_once "approval.php";
   require_once "show_data.php";
+  require_once "occupancy_list.php";
   if( SAFETY_MONITOR_SIGNUP ) {
     require_once "safety_monitor.php";
   }

@@ -43,7 +43,7 @@ function showPendingRequests() {
     $auto_approval = checkAutoApproval($why_not_approved,$approval_warnings,$row['ID'],$row);
 
     $conflict_class = $conflict ? "conflict" : "";
-    echo "<tr class='record {$conflict_class}'>";
+    echo "<tr class='record {$conflict_class} approval_row' onclick='selectApprovalRow(this)' data-day='",htmlescape(date('Y-m-d',strtotime($row['START_TIME']))),"' data-room='",htmlescape($row['ROOM']),"' data-building='",htmlescape($row['BUILDING']),"'>";
     $id = $row["ID"];
     $checked = $row["APPROVED"] == "Y" ? "checked" : "";
     echo "<td><input type='checkbox' value='1' name='approve_$id' id='approve_$id' $checked onchange='approveChanged($id)'/></td>";
@@ -76,6 +76,22 @@ function showPendingRequests() {
   echo "</tbody></table><br>\n";
   echo "<p><input type='submit' name='submit' value='Submit'/></p>\n";
   echo "</form>\n";
+
+  echo "<p><hr></p>\n";
+  echo "<h2>Occupancy</h2>\n";
+
+  echo "<p>Date: <input type='date' id='day' value='",date("Y-m-d"),"' onchange='updateSlotInfo()'/>\n";
+  echo " Room: <input type='text' id='room' size='10' oninput='filterChanged()' autocomplete='off'/>\n";
+  $selected_building = getDefaultBuilding(getUserDepartment());
+  foreach( array_merge(BUILDING_NAMES,array("All")) as $building ) {
+    $checked = $selected_building == $building ? "checked" : "";
+    echo "<label class='building-input'><input type='radio' name='building' value='",htmlescape($building),"' $checked onchange='updateSlotInfo()'/>&nbsp;",htmlescape($building),"</label>\n";
+  }
+
+  echo "</p>\n";
+
+  showOccupancyList();
+
   ?><script>
   function denyChanged(id) {
     if( $('#deny_' + id + ':checked').val() ) {
@@ -91,6 +107,49 @@ function showPendingRequests() {
       denyChanged(id);
     }
   }
+  function selectApprovalRow(e) {
+    var was_selected = $(e).hasClass("selected");
+    $('.approval_row').removeClass("selected");
+    $('input[name="building"]').prop('checked',false);
+    if( was_selected ) {
+      $('#room').val('');
+    }
+    else {
+      $(e).addClass("selected");
+      $('#day').val($(e).attr("data-day"));
+      $('#room').val($(e).attr("data-room"));
+      var building = $(e).attr("data-building");
+      $('input[name="building"][value="' + building + '"]').prop('checked',true);
+    }
+    filterChanged();
+  }
+  var filter_changed_timer;
+  function filterChanged() {
+    if( filter_changed_timer ) {
+      window.clearTimeout(filter_changed_timer);
+    }
+    filter_changed_timer = window.setTimeout(updateSlotInfo,200);
+  }
+  function updateSlotInfo() {
+    var url = "<?php echo WEB_APP_TOP ?>usage_info.php?";
+    var day = $('#day').val();
+    url += "day=" + encodeURIComponent(day);
+    var room = $('#room').val();
+    if( room ) {
+      url += "&room=" + encodeURIComponent(room);
+    }
+    var building = $("input[name='building']:checked").val();
+    if( building && building != "All" ) {
+      url += "&building=" + encodeURIComponent(building);
+    }
+    $.ajax({ url: url, success: function(data) {
+      fillOccupancyList(data);
+    },
+    complete: function() {
+      setTimeout(updateSlotInfo,60000);
+    }});
+  }
+  window.addEventListener('load', function () {updateSlotInfo();});
   </script><?php
 }
 

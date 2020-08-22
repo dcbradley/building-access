@@ -1,3 +1,4 @@
+
 .slotinfo {
     font-size: 0.6rem;
     line-height: 0.7rem;
@@ -219,4 +220,14 @@ h1 {
 }
 #safety-monitor-panel .safety-monitor-row {
     font-size: 0.75rem;
+}
+
+table.records tr.record.approval_row {
+    cursor: pointer;
+}
+table.records tr.record.approval_row:hover:not(.selected) {
+    background-color: #E0E0F0;
+}
+table.records tr.record.approval_row.selected {
+    background-color: #C0C0D0;
 }
