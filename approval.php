@@ -33,8 +33,10 @@ function showPendingRequests() {
 
   echo "<p><input type='submit' name='submit' value='Submit'/></p>\n";
 
+  $approval_row_count = 0;
   echo "<table class='records'><thead><tr><th ",SORTABLE_COLUMN,"><small>Aprv</small></th><th ",SORTABLE_COLUMN,"><small>Deny</small></th><th ",SORTABLE_COLUMN,">Time</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Purpose</th><th ",SORTABLE_COLUMN,">Conflict</th></tr></thead><tbody>\n";
   while( ($row=$stmt->fetch()) ) {
+    $approval_row_count += 1;
     $why_not_approved = array();
     $roomcap_warnings = array();
     $conflict = !checkRoomCaps($why_not_approved,$roomcap_warnings,$row);
@@ -74,6 +76,9 @@ function showPendingRequests() {
     echo "</tr>\n";
   }
   echo "</tbody></table><br>\n";
+  if( !$approval_row_count ) {
+    echo "<p>No requests for approval are pending at this time.</p>\n";
+  }
   echo "<p><input type='submit' name='submit' value='Submit'/></p>\n";
   echo "</form>\n";
 
