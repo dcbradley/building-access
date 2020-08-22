@@ -45,7 +45,8 @@ function showPendingRequests() {
     $auto_approval = checkAutoApproval($why_not_approved,$approval_warnings,$row['ID'],$row);
 
     $conflict_class = $conflict ? "conflict" : "";
-    echo "<tr class='record {$conflict_class} approval_row' onclick='selectApprovalRow(this)' data-day='",htmlescape(date('Y-m-d',strtotime($row['START_TIME']))),"' data-room='",htmlescape($row['ROOM']),"' data-building='",htmlescape($row['BUILDING']),"'>";
+    $selected = array_key_exists("id",$_REQUEST) && $_REQUEST["id"] == $row["ID"] ? "selected" : "";
+    echo "<tr class='record {$conflict_class} approval_row $selected' onclick='selectApprovalRow(this)' data-day='",htmlescape(date('Y-m-d',strtotime($row['START_TIME']))),"' data-room='",htmlescape($row['ROOM']),"' data-building='",htmlescape($row['BUILDING']),"'>";
     $id = $row["ID"];
     $checked = $row["APPROVED"] == "Y" ? "checked" : "";
     echo "<td><input type='checkbox' value='1' name='approve_$id' id='approve_$id' $checked onchange='approveChanged($id)'/></td>";
@@ -154,7 +155,14 @@ function showPendingRequests() {
       setTimeout(updateSlotInfo,60000);
     }});
   }
-  window.addEventListener('load', function () {updateSlotInfo();});
+  window.addEventListener('load', function () {
+    var e = $('.approval_row.selected');
+    if( e.length ) {
+      e.removeClass('selected'); // remove before selecting again to prevent it from unselecting
+      selectApprovalRow(e); // load data from row into the occupancy listing
+    }
+    updateSlotInfo();
+  });
   </script><?php
 }
 

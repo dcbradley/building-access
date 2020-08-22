@@ -923,7 +923,7 @@ function requestApproval(&$show) {
   }
   $msg[] = '';
   $msg[] = "This request was not automatically approved.  To approve/deny this request, go here:";
-  $msg[] = SELF_FULL_URL . "?s=pending";
+  $msg[] = SELF_FULL_URL . "?s=pending&id=" . $request['ID'];
 
   $msg = implode("\r\n",$msg);
 
