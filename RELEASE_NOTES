@@ -1,3 +1,5 @@
+* Preserve the contents of the registration form when changing the date.
+
 * Added occupancy map on the administrative approval page.
 
 * Added configuration settings DEFAULT_PRIVACY (default false) and

@@ -8,7 +8,6 @@ addSubmitHandler( new SubmitHandler('request_approval','requestApproval') );
 function showRequestForm() {
 
   $slot_minutes = 60;
-  $cur_day = isset($_REQUEST["day"]) ? $_REQUEST["day"] : getThisAllowedDayOrNext(date("Y-m-d"),REGISTRATION_HOURS);
 
   $request_id = isset($_REQUEST["id"]) ? $_REQUEST["id"] : null;
   $editing = null;
@@ -20,9 +19,12 @@ function showRequestForm() {
     $stmt->bindValue(":NETID",REMOTE_USER_NETID);
     $stmt->execute();
     $editing = $stmt->fetch();
-    if( $editing ) {
-      $cur_day = date("Y-m-d",strtotime($editing["START_TIME"]));
-    }
+  }
+
+  $cur_day = $editing ? date("Y-m-d",strtotime($editing["START_TIME"])) : getThisAllowedDayOrNext(date("Y-m-d"),REGISTRATION_HOURS);
+
+  if( array_key_exists('day',$_REQUEST) ) {
+    $cur_day = $_REQUEST["day"];
   }
 
   $next_day = getNextAllowedDay($cur_day,REGISTRATION_HOURS);
@@ -30,6 +32,8 @@ function showRequestForm() {
   $today = date("Y-m-d");
 
   echo REQUEST_FORM_HEADER;
+
+  initDefaultQueryParams();
 
   if( SAFETY_MONITOR_SIGNUP && defined('SAFETY_MONITOR_PANEL') && SAFETY_MONITOR_PANEL ) {
     echo "<div id='safety-monitor-panel'>\n";
@@ -40,7 +44,7 @@ function showRequestForm() {
   echo "<p>";
   $url = SELF_FULL_URL . "?day=" . $prev_day;
   if( $prev_day == $today ) $url = SELF_FULL_URL;
-  echo "<a href='$url' class='btn btn-primary'><i class='fas fa-arrow-left'></i></a>\n";
+  echo "<a href='$url' class='btn btn-primary' onclick='updateDateBtnUrl(this); return true;'><i class='fas fa-arrow-left'></i></a>\n";
 
   $url = SELF_FULL_URL;
   if( $cur_day == $today ) {
@@ -49,11 +53,11 @@ function showRequestForm() {
   } else {
     $disabled_class = "";
   }
-  echo "<a href='$url' class='btn btn-primary $disabled_class'>Today</a>\n";
+  echo "<a href='$url' class='btn btn-primary $disabled_class' onclick='updateDateBtnUrl(this); return true;'>Today</a>\n";
 
   $url = SELF_FULL_URL . "?day=" . $next_day;
   if( $next_day == $today ) $url = SELF_FULL_URL;
-  echo "<a href='$url' class='btn btn-primary'><i class='fas fa-arrow-right'></i></a>\n";
+  echo "<a href='$url' class='btn btn-primary' onclick='updateDateBtnUrl(this); return true;'><i class='fas fa-arrow-right'></i></a>\n";
 
   echo " ",htmlescape(date("D, M j, Y",strtotime($cur_day)));
   echo "</p>\n";
@@ -74,6 +78,14 @@ function showRequestForm() {
   } else {
     $default_department = getUserDepartment();
   }
+  # Note that here and throughout this form, defaultQueryParam() should not be
+  # passed the value from the query paramters, if any, but should take into
+  # account any other defaults, including values loaded from an existing record
+  # that we are editing.  This allows updateDateBtnUrl() to preserve edits.
+  defaultQueryParam('department',htmlescape($default_department));
+  if( array_key_exists('department',$_REQUEST) ) {
+    $default_department = $_REQUEST['department'];
+  }
   if( count(DEPARTMENTS)==1 && $default_department == DEPARTMENTS[0] ) {
     echo "<input type='hidden' name='department' id='department' value='",htmlescape($default_department),"'/>\n";
   }
@@ -90,12 +102,20 @@ function showRequestForm() {
 
   echo "<div class='field-title'><label for='purpose'>Purpose</label></div>\n";
   $value = $editing ? $editing["PURPOSE"] : "";
+  defaultQueryParam('purpose',htmlescape($value));
+  if( array_key_exists('purpose',$_REQUEST) ) {
+    $value = $_REQUEST['purpose'];
+  }
   echo "<div class='field-input'><input type='text' name='purpose' maxlength='280' value='",htmlescape($value),"'/></div>\n";
 
   if( $editing ) {
     $checked = array_key_exists("SAFETY_MONITOR",$editing) && $editing["SAFETY_MONITOR"] ? "checked" : "";
   } else {
-    $checked = array_key_exists("safety_monitor",$_REQUEST) && $_REQUEST["safety_monitor"] ? "checked" : "";
+    $checked = "";
+  }
+  defaultQueryParam('safety_monitor',$checked ? '1' : '');
+  if( array_key_exists("safety_monitor",$_REQUEST) ) {
+    $checked = $_REQUEST["safety_monitor"] ? "checked" : "";
   }
   if( $checked ) {
     echo "<div class='field-input'><label><input type='checkbox' name='safety_monitor' value='1' $checked /> I will act as a safety monitor during this time</label></div>\n";
@@ -103,9 +123,17 @@ function showRequestForm() {
 
   echo "<div class='field-title'><label for='room'>Room(s)</label></div>\n";
   $value = $editing ? $editing["ROOM"] : "";
+  defaultQueryParam('room',$value);
+  if( array_key_exists('room',$_REQUEST) ) {
+    $value = $_REQUEST['room'];
+  }
   echo "<div class='field-input'><input type='text' name='room' maxlength='60' placeholder='room1, room2, ...' value='",htmlescape($value),"' oninput='filterChanged()'/>\n";
   echo "<span style='white-space: nowrap;'>\n";
   $selected_building = $editing ? $editing["BUILDING"] : getDefaultBuilding($default_department);
+  defaultQueryParam('building',$selected_building);
+  if( array_key_exists('building',$_REQUEST) ) {
+    $selected_building = $_REQUEST['building'];
+  }
   foreach( BUILDING_NAMES as $building ) {
     $checked = $selected_building == $building ? "checked" : "";
     echo "<label class='building-input'><input type='radio' name='building' value='",htmlescape($building),"' $checked onchange='updateSlotInfo()'/>&nbsp;",htmlescape($building),"</label>\n";
@@ -119,7 +147,11 @@ function showRequestForm() {
   if( $editing ) {
     $value = date("H:i",strtotime($editing["START_TIME"]));
   } else {
-    $value = array_key_exists('start_time',$_REQUEST) ? $_REQUEST['start_time'] : "";
+    $value = "";
+  }
+  defaultQueryParam('start_time',$value);
+  if( array_key_exists('start_time',$_REQUEST) ) {
+    $value = $_REQUEST['start_time'];
   }
   echo "<div class='field-input'><input type='time' name='start_time' id='start_time' placeholder='14:00' value='",htmlescape($value),"' onchange='updateSlotInfo()'/></div>\n";
   echo "</div>\n";
@@ -128,11 +160,19 @@ function showRequestForm() {
   if( $editing ) {
     $value = date("H:i",strtotime($editing["END_TIME"]));
   } else {
-    $value = array_key_exists('end_time',$_REQUEST) ? $_REQUEST['end_time'] : "";
+    $value = "";
+  }
+  defaultQueryParam('end_time',$value);
+  if( array_key_exists('end_time',$_REQUEST) ) {
+    $value = $_REQUEST['end_time'];
   }
   echo "<div class='field-input'><input type='time' name='end_time' id='end_time' placeholder='15:00' value='",htmlescape($value),"' onchange='updateSlotInfo()'/></div>\n";
   echo "</div>\n";
   $checked = $editing && $editing['REPEAT_PARENT'] ? 'checked' : '';
+  defaultQueryParam('repeat',$checked ? "1" : "");
+  if( array_key_exists('repeat',$_REQUEST) ) {
+    $checked = $_REQUEST['repeat'] ? 'checked' : '';
+  }
   echo "<label><input type='checkbox' name='repeat' value='1' autocomplete='off' onchange='repeatChanged()' $checked/> repeat ...</label>\n";
   echo "</div>\n";
 
@@ -141,10 +181,14 @@ function showRequestForm() {
   $dayname = date("l",strtotime($cur_day));
   foreach( WEEKDAY_NAMES as $day ) {
     $day_char = dayNameToChar($day);
-    if( $editing ) {
+    if( $editing && $editing['REPEAT_PARENT'] ) {
       $checked = strpos($editing['REPEAT_DAYS'],$day_char) !== false ? 'checked' : '';
     } else {
       $checked = $dayname == $day ? "checked" : "";
+    }
+    defaultQueryParam('repeat_days[]',$checked ? $day_char : "");
+    if( array_key_exists('repeat_days',$_REQUEST) ) {
+      $checked = in_array($day_char,$_REQUEST['repeat_days']) ? 'checked' : '';
     }
     echo "<label style='margin-right: 1em;'><input type='checkbox' value='$day_char' name='repeat_days[]' $checked /> ",htmlescape($day),"</label>\n";
   }
@@ -160,6 +204,10 @@ function showRequestForm() {
       $checked = $month_name == date("F",strtotime($editing['REPEAT_THROUGH'])) ? "checked" : "";
     } else {
       $checked = $month_name == $cur_month_name ? "checked" : "";
+    }
+    if( $checked ) defaultQueryParam('repeat_through',htmlescape($end_of_month_date));
+    if( array_key_exists('repeat_through',$_REQUEST) ) {
+      $checked = $_REQUEST['repeat_through'] == htmlescape($end_of_month_date) ? "checked" : "";
     }
     echo "<label style='margin-right: 1em;'><input type='radio' name='repeat_through' value='",htmlescape($end_of_month_date),"' $checked /> ",htmlescape($month_name),"</label>\n";
   }
@@ -187,6 +235,10 @@ function showRequestForm() {
       $last_privacy = $privacy_record ? getPrivacy($privacy_record) : PRIVACY_CODE_DEFAULT;
     }
     $checked = resolvePrivacy($last_privacy) == PRIVACY_CODE_YES ? "checked" : "";
+    defaultQueryParam('privacy',$checked ? "1" : "");
+    if( array_key_exists('privacy',$_REQUEST) ) {
+      $checked = $_REQUEST['privacy'] ? "checked" : "";
+    }
     echo "<label><input type='checkbox' name='privacy' value='1' $checked/> in the occupancy list, only show my name to administrators of this app</label>\n";
     echo "</div>\n";
   }
@@ -229,6 +281,86 @@ function showRequestForm() {
   showOccupancyList();
 
   ?><script>
+    function getParamsFromUrl(url) {
+      var question = url.indexOf("?");
+      if( question == -1 ) return {};
+      var query = url.substr(question+1);
+      var result = {};
+      query.split("&").forEach(function(part) {
+        var item = part.split("=");
+        result[item[0]] = decodeURIComponent(item[1]);
+      });
+      return result;
+    }
+    function updateDateBtnUrl(btn) {
+      var old_url = btn.href;
+      var old_params = getParamsFromUrl(old_url);
+      var new_params = {};
+      if( "day" in old_params ) {
+        new_params["day"] = old_params["day"];
+      }
+
+      $('#registration_form').find('input,select').each( function( index ) {
+        if( this.type == 'submit' ) return;
+        if( this.name == 'day' ) return;
+        if( this.name == 'form' ) return;
+        var value = undefined;
+        if( this.type == 'checkbox' ) {
+          if( this.checked ) {
+            value = this.value;
+          } else {
+            value = "";
+          }
+        }
+        else if( this.type == 'radio' ) {
+          if( this.checked ) {
+            value = this.value;
+          }
+        }
+        else {
+          if( this.value ) {
+            value = this.value;
+          }
+        }
+	if( value !== undefined ) {
+	  if( this.name.indexOf("]") != -1 ) {
+	    // this is an array param
+	    if( !(this.name in new_params) ) new_params[this.name] = [];
+	    new_params[this.name].push(value);
+	  } else {
+	    new_params[this.name] = value;
+	  }
+	}
+      });
+
+      var new_url = "";
+      for( var param in new_params ) {
+        // use JSON.stringify in comparison so that arrays can be compared
+        if( (param in default_query_params) && JSON.stringify(new_params[param]) == JSON.stringify(default_query_params[param]) ) {
+          continue;
+	}
+	if( param.indexOf("]") != -1 ) {
+	  // array param
+	  for( var index in new_params[param] ) {
+            if( new_url ) new_url += "&";
+	    new_url += param + "=" + encodeURIComponent(new_params[param][index]);
+	  }
+	}
+	else {
+          if( new_url ) new_url += "&";
+          new_url += param + "=" + encodeURIComponent(new_params[param]);
+	}
+      }
+      if( new_url ) new_url = "?" + new_url;
+
+      var question = old_url.indexOf("?");
+      if( question == -1 ) {
+        new_url = old_url + new_url;
+      } else {
+        new_url = old_url.substr(0,question) + new_url;
+      }
+      btn.href = new_url;
+    }
     function repeatChanged() {
       if( $("#registration_form input[name='repeat']:checked").val() ) {
         $(".repeat-options").show();
@@ -323,6 +455,18 @@ function showRequestForm() {
   </script><?php
 }
 
+function initDefaultQueryParams() {
+  echo "<script>var default_query_params = {};</script>\n";
+}
+function defaultQueryParam($param,$value) {
+  # This function is used to store the default values given to form inputs.
+  if( substr($param,strlen($param)-1) == ']' ) { # array params end in '[]'
+    echo "<script>if( !('$param' in default_query_params) ) default_query_params['$param'] = []; default_query_params['$param'].push(" . json_encode($value) . ");</script>\n";
+  } else {
+    echo "<script>default_query_params['$param'] = " . json_encode($value) . ";</script>\n";
+  }
+}
+
 function clearRegistrationSubmitVars() {
   # preserve the page to be shown and the selected day
   static $preserve = array("s","day");
@@ -342,7 +486,7 @@ function saveRequest(&$show) {
   $submission_errors = false;
 
   if( $_REQUEST["submit"] == "Clear" ) {
-    $_REQUEST["id"] = ""; # clear form
+    clearRegistrationSubmitVars();
     return;
   }
 
