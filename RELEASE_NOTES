@@ -1,3 +1,6 @@
+* Fixed error causing failure to submit a repeating registration
+  when mysql is in strict mode.
+
 * Preserve the contents of the registration form when changing the date.
 
 * Added occupancy map on the administrative approval page.
