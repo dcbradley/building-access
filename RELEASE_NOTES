@@ -1,3 +1,5 @@
+* Add approve all and deny all checkboxes on the approval form.
+
 * Fixed error causing failure to submit a repeating registration
   when mysql is in strict mode.
 

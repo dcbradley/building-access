@@ -34,7 +34,10 @@ function showPendingRequests() {
   echo "<p><input type='submit' name='submit' value='Submit'/></p>\n";
 
   $approval_row_count = 0;
-  echo "<table class='records'><thead><tr><th ",SORTABLE_COLUMN,"><small>Aprv</small></th><th ",SORTABLE_COLUMN,"><small>Deny</small></th><th ",SORTABLE_COLUMN,">Time</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Purpose</th><th ",SORTABLE_COLUMN,">Conflict</th></tr></thead><tbody>\n";
+  echo "<table class='records'><thead><tr>";
+  echo "<th><small>Aprv</small><br><input type='checkbox' name='approve_all' id='approve_all' onchange='approveAllChanged()'/></th>";
+  echo "<th><small>Deny</small><br><input type='checkbox' name='deny_all' id='deny_all' onchange='denyAllChanged()'/></th>";
+  echo "<th ",SORTABLE_COLUMN,">Time</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Purpose</th><th ",SORTABLE_COLUMN,">Conflict</th></tr></thead><tbody>\n";
   while( ($row=$stmt->fetch()) ) {
     $approval_row_count += 1;
     $why_not_approved = array();
@@ -49,10 +52,10 @@ function showPendingRequests() {
     echo "<tr class='record {$conflict_class} approval_row $selected' onclick='selectApprovalRow(this)' data-day='",htmlescape(date('Y-m-d',strtotime($row['START_TIME']))),"' data-room='",htmlescape($row['ROOM']),"' data-building='",htmlescape($row['BUILDING']),"'>";
     $id = $row["ID"];
     $checked = $row["APPROVED"] == "Y" ? "checked" : "";
-    echo "<td><input type='checkbox' value='1' name='approve_$id' id='approve_$id' $checked onchange='approveChanged($id)'/></td>";
+    echo "<td><input type='checkbox' class='approve_checkbox' value='1' name='approve_$id' id='approve_$id' $checked onchange='approveChanged($id)'/></td>";
     $checked = $row["APPROVED"] == "N" ? "checked" : "";
-    echo "<td><input type='checkbox' value='1' name='deny_$id' id='deny_$id' $checked onchange='denyChanged($id)'/>";
-    echo "<br><input style='display: none' type='text' size='15' name='deny_reason_$id' id='deny_reason_$id' placeholder='reason'/></td>";
+    echo "<td><input type='checkbox' class='deny_checkbox' value='1' name='deny_$id' id='deny_$id' $checked onchange='denyChanged($id)'/>";
+    echo "<br><input style='display: none' type='text' class='deny_reason' size='15' name='deny_reason_$id' id='deny_reason_$id' placeholder='reason'/></td>";
     $timerange = date("D m/d H:i",strtotime($row["START_TIME"])) . " - " . date("H:i",strtotime($row["END_TIME"]));
     $sortdata = "<span class='sort_data'>" . date("Y-m-d H:i",strtotime($row["START_TIME"])) . "</span>";
     echo "<td>",htmlescape($timerange),"\n",$sortdata,"</td>";
@@ -99,6 +102,30 @@ function showPendingRequests() {
   showOccupancyList();
 
   ?><script>
+  function approveAllChanged() {
+    var approve_all = document.getElementById('approve_all');
+    var deny_all = document.getElementById('deny_all');
+    if( approve_all.checked ) {
+      deny_all.checked = false;
+      $('.approve_checkbox').prop('checked',true);
+      $('.deny_checkbox').prop('checked',false);
+      $('.deny_reason').hide();
+    } else {
+      $('.approve_checkbox').prop('checked',false);
+    }
+  }
+  function denyAllChanged() {
+    var approve_all = document.getElementById('approve_all');
+    var deny_all = document.getElementById('deny_all');
+    if( deny_all.checked ) {
+      approve_all.checked = false;
+      $('.deny_checkbox').prop('checked',true);
+      $('.approve_checkbox').prop('checked',false);
+      $('.deny_reason').show();
+    } else {
+      $('.deny_checkbox').prop('checked',false);
+    }
+  }
   function denyChanged(id) {
     if( $('#deny_' + id + ':checked').val() ) {
       $('#deny_reason_' + id).show();
