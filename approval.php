@@ -124,6 +124,7 @@ function showPendingRequests() {
       $('.deny_reason').show();
     } else {
       $('.deny_checkbox').prop('checked',false);
+      $('.deny_reason').hide();
     }
   }
   function denyChanged(id) {
