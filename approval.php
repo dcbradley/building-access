@@ -28,7 +28,7 @@ function showPendingRequests() {
   $stmt->bindValue(":PENDING_APPROVAL",PENDING_APPROVAL);
   $stmt->execute();
 
-  echo "<form enctype='multipart/form-data' method='POST' autocomplete='off' onsubmit='return validateInput();'>\n";
+  echo "<form enctype='multipart/form-data' method='POST' autocomplete='off'>\n";
   echo "<input type='hidden' name='form' value='pending'/>\n";
 
   echo "<p><input type='submit' name='submit' value='Submit'/></p>\n";
