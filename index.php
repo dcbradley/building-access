@@ -50,7 +50,10 @@ if( !REMOTE_USER_NETID ) {
 
     foreach( $submit_handlers as $handler ) {
       if( $form == $handler->tag ) {
-        call_user_func($handler->handler_fn,array(&$show));
+        $new_show = call_user_func($handler->handler_fn,$show);
+	if( is_string($new_show) ) {
+	  $show = $new_show;
+	}
       }
     }
   }

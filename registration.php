@@ -480,7 +480,7 @@ function clearRegistrationSubmitVars() {
   }
 }
 
-function saveRequest(&$show) {
+function saveRequest($show) {
 
   $continue_editing_this_request = false;
   $submission_errors = false;
@@ -1013,7 +1013,7 @@ function doRepeat($id,&$repeat_status) {
   $repeat_status = "Created {$insert_count} repeats, updated {$update_count}, and deleted {$delete_count}.";
 }
 
-function requestApproval(&$show) {
+function requestApproval($show) {
 
   $id = $_POST["id"];
   $dbh = connectDB();
@@ -1096,5 +1096,5 @@ function requestApproval(&$show) {
   echo "<div class='alert alert-success'>Approval requested.</div>\n";
 
   $_REQUEST["id"] = ""; # clear form
-  $show = "";
+  return ""; # show the default page
 }
