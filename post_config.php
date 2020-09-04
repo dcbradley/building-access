@@ -34,7 +34,7 @@ welcome.</p>
 }
 
 if( !defined('BUILDING_VISIBILITY_MANIFEST_GROUP') ) {
-  define('BUILDING_VISIBILITY_MANIFEST_GROUP',array());
+  define('BUILDING_VISIBILITY_MANIFEST_GROUP',null);
 }
 
 if( !defined('DEFAULT_PRIVACY') ) {

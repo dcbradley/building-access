@@ -775,7 +775,7 @@ function isVisible($netid,$room,$building,$department,$privacy) {
   }
 
   # finally, check building visibility manifest group, if any
-  if( !array_key_exists($building,BUILDING_VISIBILITY_MANIFEST_GROUP) ) {
+  if( !BUILDING_VISIBILITY_MANIFEST_GROUP || !array_key_exists($building,BUILDING_VISIBILITY_MANIFEST_GROUP) ) {
     return true;
   }
   $visibility_groups = BUILDING_VISIBILITY_MANIFEST_GROUP[$building];
