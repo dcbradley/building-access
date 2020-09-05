@@ -196,7 +196,7 @@ function showRequestForm() {
 
   echo "<div class='field-title'>Repeat through</div><div class='field-input'>";
   $cur_month_name = date("F",strtotime($cur_day));
-  for($month_offset=0; $month_offset<2; $month_offset++) {
+  for($month_offset=0; $month_offset<4; $month_offset++) {
     $end_of_month_date = getEndOfMonth($cur_day,$month_offset);
     $month_name = date("F",strtotime($end_of_month_date));
 
