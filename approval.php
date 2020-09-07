@@ -203,13 +203,13 @@ function savePending() {
   $dbh = connectDB();
   $sql = "UPDATE building_access SET APPROVED = 'Y', APPROVED_TIME = now(), APPROVED_BY = :NETID WHERE ID = :ID AND APPROVED = :PENDING_APPROVAL";
   $approve_stmt = $dbh->prepare($sql);
-  $approve_stmt->bindValue(":NETID",REMOTE_USER_NETID);
+  $approve_stmt->bindValue(":NETID",REAL_REMOTE_USER_NETID);
   $approve_stmt->bindParam(":ID",$id);
   $approve_stmt->bindValue(":PENDING_APPROVAL",PENDING_APPROVAL);
 
   $sql = "UPDATE building_access SET APPROVED = 'N', APPROVED_TIME = now(), APPROVED_BY = :NETID, ADMIN_REASON = :REASON WHERE ID = :ID AND APPROVED = :PENDING_APPROVAL";
   $deny_stmt = $dbh->prepare($sql);
-  $deny_stmt->bindValue(":NETID",REMOTE_USER_NETID);
+  $deny_stmt->bindValue(":NETID",REAL_REMOTE_USER_NETID);
   $deny_stmt->bindParam(":ID",$id);
   $deny_stmt->bindParam(":REASON",$reason);
   $deny_stmt->bindValue(":PENDING_APPROVAL",PENDING_APPROVAL);

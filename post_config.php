@@ -7,6 +7,14 @@
 # All optional configuration variables are given a default value here
 # in case they are not defined in config.php.
 
+if( !defined('ALLOW_ADMIN_ACT_AS') ) {
+  define('ALLOW_ADMIN_ACT_AS',true);
+}
+
+if( !defined('REMOTE_USER_NETID') ) {
+  setRemoteUser();
+}
+
 if( !defined('WEB_APP_TITLE') ) {
   define('WEB_APP_TITLE',"Building Access");
 }

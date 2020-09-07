@@ -1,3 +1,14 @@
+* For auditing purposes, log all registration actions, including
+  creation, update, and deletion in the web server log.  When an admin
+  performs the action on behalf of someone else, this is clearly
+  indicated.
+
+* Allow admins to change the name and email address associated
+  with a registration.
+
+* Added 'Act As' feature for admins to temporarily become
+  someone else.  To disable, set ALLOW_ADMIN_ACT_AS=false.
+
 * Allow repeating registrations to be placed up to three
   months from the current one.
 

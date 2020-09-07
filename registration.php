@@ -243,6 +243,43 @@ function showRequestForm() {
     echo "</div>\n";
   }
 
+  if( isRealDeptAdmin() ) {
+    $admin_options_visible = false;
+    echo "<div class='card' id='admin_options' style='display: none;'><div class='card-body'><h5 class='card-title'>Admin Options</h5>\n";
+
+    echo "<div class='field-title'><label for='name'>Name</label></div>\n";
+    $value = $editing ? $editing["NAME"] : (getWebUserName()==REMOTE_USER_NETID ? '' : getWebUserName());
+    defaultQueryParam('name',htmlescape($value));
+    if( array_key_exists('name',$_REQUEST) ) {
+      $value = $_REQUEST['name'];
+    }
+    if( $value != getWebUserName() || $value == REMOTE_USER_NETID ) {
+      $admin_options_visible = true;
+    }
+    echo "<div class='field-input'><input type='text' name='name' id='name' maxlength='120' value='",htmlescape($value),"'/></div>\n";
+
+    echo "<div class='field-title'><label for='email'>Email</label></div>\n";
+    $value = $editing ? $editing["EMAIL"] : (getWebUserEmail()==REMOTE_USER_NETID ? '' : getWebUserEmail());
+    defaultQueryParam('email',htmlescape($value));
+    if( array_key_exists('email',$_REQUEST) ) {
+      $value = $_REQUEST['email'];
+    }
+    if( $value != getWebUserEmail() ) {
+      $admin_options_visible = true;
+    }
+    echo "<div class='field-input'><input type='text' name='email' id='email' maxlength='120' value='",htmlescape($value),"'/></div>\n";
+
+    echo "</div></div>\n";
+
+    if( $admin_options_visible ) {
+      echo "<script>window.addEventListener('load', function () {\$('#admin_options').show();});</script>\n";
+    }
+  }
+
+  if( REAL_REMOTE_USER_NETID != REMOTE_USER_NETID ) {
+    echo "<div class='alert alert-info'>You are editing this form on behalf of ",htmlescape(REMOTE_USER_NETID),".</div>\n";
+  }
+
   echo "<div id='missing_department' class='alert alert-danger' style='display: none'>Please select your department.</div>\n";
   echo "<div id='missing_room' class='alert alert-danger' style='display: none'>You must specify a room.</div>\n";
   echo "<div id='missing_time' class='alert alert-danger' style='display: none'>You must specify a starting and ending time.</div>\n";
@@ -271,6 +308,9 @@ function showRequestForm() {
     echo " <input type='submit' name='submit' value='Delete' />";
     echo " <input type='submit' name='submit' value='Clear' />";
   }
+  if( isRealDeptAdmin() && !$admin_options_visible ) {
+    echo " <input type='submit' name='admin_options' id='admin_options_button' value='Admin Options' onclick='showAdminOptions(); return false'/>";
+  }
   echo "</p>\n";
   echo "</form>\n";
 
@@ -281,6 +321,10 @@ function showRequestForm() {
   showOccupancyList();
 
   ?><script>
+    function showAdminOptions() {
+      $('#admin_options').show();
+      $('#admin_options_button').hide();
+    }
     function getParamsFromUrl(url) {
       var question = url.indexOf("?");
       if( question == -1 ) return {};
@@ -550,6 +594,7 @@ function saveRequest($show) {
 
   $dbh = connectDB();
   $approved = '';
+  $editing = null;
   if( isset($_REQUEST["id"]) ) {
     $editing = loadRequest($_REQUEST["id"]);
     if( !$editing ) {
@@ -581,6 +626,14 @@ function saveRequest($show) {
       }
       $count_str = $row_count > 1 ? " {$row_count} registrations" : "";
       echo "<div class='alert alert-success'>Deleted{$count_str}.</div>\n";
+
+      $delete_msg = "Deleted registration";
+      if( $row_count > 1 ) {
+        $delete_msg .= " and " . ($row_count-1) . " repeats";
+      }
+      $delete_msg .= ": " . registrationDescriptionForLog($editing);
+      logRegistrationAction($editing["ID"],$delete_msg,false);
+
       clearRegistrationSubmitVars();
       return;
     }
@@ -603,6 +656,8 @@ function saveRequest($show) {
     $sql = "
       UPDATE building_access SET
         UPDATED = NOW(),
+        NAME = :NAME,
+        EMAIL = :EMAIL,
         DEPARTMENT = :DEPARTMENT,
         PURPOSE = :PURPOSE,
         BUILDING = :BUILDING,
@@ -641,10 +696,29 @@ function saveRequest($show) {
     ";
     $stmt = $dbh->prepare($sql);
     $stmt->bindValue(":NETID",REMOTE_USER_NETID);
-    $stmt->bindValue(":NAME",getWebUserName());
-    $stmt->bindValue(":EMAIL",$email);
     $approved = INITIALIZING_APPROVAL;
     $stmt->bindValue(":INITIALIZING_APPROVAL",$approved);
+  }
+
+  if( isRealDeptAdmin() ) {
+    if( array_key_exists("name",$_REQUEST) && $_REQUEST["name"] ) {
+      $stmt->bindValue(":NAME",$_REQUEST["name"]);
+    } else {
+      $stmt->bindValue(":NAME",$cn);
+    }
+    if( array_key_exists("email",$_REQUEST) && $_REQUEST["email"] ) {
+      $stmt->bindValue(":EMAIL",$_REQUEST["email"]);
+    } else {
+      $stmt->bindValue(":EMAIL",$email);
+    }
+  } else {
+    if( $editing ) {
+      $stmt->bindValue(":NAME",$editing["NAME"]);
+      $stmt->bindValue(":EMAIL",$editing["EMAIL"]);
+    } else {
+      $stmt->bindValue(":NAME",$cn);
+      $stmt->bindValue(":EMAIL",$email);
+    }
   }
 
   $department = $_REQUEST["department"];
@@ -776,9 +850,11 @@ function saveRequest($show) {
 
   if( isset($_REQUEST["id"]) ) {
     $id = $_REQUEST["id"];
+    $edit_msg = "Updated";
   } else {
     $id = $dbh->lastInsertId();
     $_REQUEST["id"] = $id; # allow editing this request
+    $edit_msg = "Created";
 
     $dup_sql = "
       SELECT ba2.ID
@@ -812,7 +888,12 @@ function saveRequest($show) {
       echo ". You may wish to <button onclick='window.history.back()'>go back</button> and fix.</div>\n";
       $submission_errors = true;
       clearRegistrationSubmitVars();
+      $id = null;
     }
+  }
+
+  if( $id ) {
+    logRegistrationAction($id,$edit_msg,true);
   }
 
   $repeat_status = "";
@@ -978,11 +1059,13 @@ function doRepeat($id,&$repeat_status) {
         $update_stmt->bindValue(':ID',$existing['ID']);
         $update_stmt->execute();
         $update_count += $update_stmt->rowCount();
+	logRegistrationAction($existing['ID'],"Updated repeat",true);
       } else {
         $insert_stmt->bindValue(':START_TIME',$cur_start_time);
         $insert_stmt->bindValue(':END_TIME',$cur_end_time);
         $insert_stmt->execute();
         $insert_count += $insert_stmt->rowCount();
+	logRegistrationAction($dbh->lastInsertId(),"Created repeat",true);
       }
     } else if( $existing ) {
       $to_delete[] = $existing['ID'];
@@ -990,6 +1073,7 @@ function doRepeat($id,&$repeat_status) {
   }
 
   foreach( $to_delete as $delete_id ) {
+    logRegistrationAction($delete_id,"Deleted repeat",true);
     $delete_stmt->bindValue(':ID',$delete_id);
     $delete_stmt->execute();
     $delete_count += $delete_stmt->rowCount();
@@ -1097,4 +1181,56 @@ function requestApproval($show) {
 
   $_REQUEST["id"] = ""; # clear form
   return ""; # show the default page
+}
+
+function registrationDescriptionForLog($row) {
+  if( !$row ) {
+    return "";
+  }
+  $desc = array();
+  $desc["ID"] = $row["ID"];
+  $desc["ROOM"] = $row["ROOM"];
+  $desc["START"] = $row["START_TIME"];
+  if( $row["START_TIME"] && $row["END_TIME"] ) {
+    $desc["DURATION"] = durationDescription($row["START_TIME"],$row["END_TIME"]);
+  }
+  $desc["APPROVED"] = $row["APPROVED"];
+  $desc["NETID"] = $row["NETID"];
+  $desc["NAME"] = $row["NAME"];
+  $desc["EMAIL"] = $row["EMAIL"];
+  $desc["DEPARTMENT"] = $row["DEPARTMENT"];
+  if( $row["PURPOSE"] ) {
+    $desc["PURPOSE"] = $row["PURPOSE"];
+  }
+
+  $result = "";
+  foreach( $desc as $key => $value ) {
+    $value = preg_replace("/[\t\n']/",' ',$value);
+    if( strpos($value," ") !== false ) {
+      $value = "'" . $value . "'";
+    }
+    if( $result ) $result .= ", ";
+    $result .= "$key = $value";
+  }
+  return $result;
+}
+
+function getUserDescriptionForLog() {
+  if( REAL_REMOTE_USER_NETID != REMOTE_USER_NETID ) {
+    return REAL_REMOTE_USER_NETID . " acting on behalf of " . REMOTE_USER_NETID;
+  }
+  return REMOTE_USER_NETID;
+}
+
+function logRegistrationAction($id,$msg,$add_registration_desc) {
+  $who_msg = getUserDescriptionForLog();
+  if( $add_registration_desc && $id ) {
+    $row = loadRequest($id);
+    if( $row ) {
+      $msg .= ": " . registrationDescriptionForLog($row);
+    } else {
+      $msg .= ": record $id no longer exists";
+    }
+  }
+  error_log("[building access] $who_msg: $msg");
 }

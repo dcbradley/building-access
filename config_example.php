@@ -20,6 +20,9 @@ const DEPT_ADMIN_EMAILS = array(
   "Survey Center"              => "example1@wisc.edu",
 );
 
+# Allow administrators to act as other people when using the building access form.
+const ALLOW_ADMIN_ACT_AS = true;
+
 const FROM_NAME = "Building Access Registrations";
 
 const FROM_EMAIL = "it-staff@physics.wisc.edu";

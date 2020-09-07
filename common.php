@@ -9,28 +9,66 @@ if( !defined('WEB_APP_TOP') ) {
   define('WEB_APP_TOP','');
 }
 
-define('REMOTE_USER_NETID',array_key_exists('REMOTE_USER',$_SERVER) ? $_SERVER['REMOTE_USER'] : '');
-
-const INITIALIZING_APPROVAL = 'I';
-const PENDING_APPROVAL = 'P';
+define('REAL_REMOTE_USER_NETID',array_key_exists('REMOTE_USER',$_SERVER) ? $_SERVER['REMOTE_USER'] : '');
 
 function isDeptAdmin() {
+  if( REMOTE_USER_NETID != REAL_REMOTE_USER_NETID ) {
+
+    # If we did allow administrative actions while acting on behalf of
+    # someone else, the real identity would be used, not the assumed
+    # one.  For clarity, do not allow administrative functions while
+    # acting as someone else.
+
+    return false;
+  }
+  return isRealDeptAdmin();
+}
+
+function isRealDeptAdmin() {
   return count(getAdminDepartments())>0;
 }
 
 function getAdminDepartments() {
   $result = array();
   foreach( DEPT_ADMINS as $department => $admins ) {
-    if( in_array(REMOTE_USER_NETID,$admins) ) $result[] = $department;
+    if( in_array(REAL_REMOTE_USER_NETID,$admins) ) $result[] = $department;
   }
   return $result;
 }
+
+function setRemoteUser() {
+  if( !ALLOW_ADMIN_ACT_AS ) {
+    define('REMOTE_USER_NETID',REAL_REMOTE_USER_NETID);
+    return;
+  }
+
+  $act_as = null;
+  if( isRealDeptAdmin() ) {
+    if( isset($_REQUEST["act_as"]) ) {
+      setcookie("building_access_act_as",$_REQUEST["act_as"],0,dirname($_SERVER["PHP_SELF"]));
+      $act_as = $_REQUEST["act_as"];
+    } else {
+      if( isset($_COOKIE["building_access_act_as"]) ) {
+        $act_as = $_COOKIE["building_access_act_as"];
+      }
+    }
+  }
+
+  if( $act_as ) {
+    define('REMOTE_USER_NETID',$act_as);
+  } else {
+    define('REMOTE_USER_NETID',REAL_REMOTE_USER_NETID);
+  }
+}
+
+const INITIALIZING_APPROVAL = 'I';
+const PENDING_APPROVAL = 'P';
 
 function getUserDepartment() {
 
   # first see if a department has already been recorded for this user
   $dbh = connectDB();
-  $sql = "SELECT DEPARTMENT FROM building_access WHERE NETID = :NETID ORDER BY ID DESC LIMIT 1";
+  $sql = "SELECT DEPARTMENT FROM building_access WHERE NETID = :NETID AND DEPARTMENT <> '' ORDER BY ID DESC LIMIT 1";
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(":NETID",REMOTE_USER_NETID);
   $stmt->execute();
@@ -41,7 +79,14 @@ function getUserDepartment() {
 
   # next, try looking this person up in ldap
   $cn = getWebUserName();
-  list($first, $last) = explode(" ",$cn,2);
+  $parts = explode(" ",$cn,2);
+  if( count($parts)==2 ) {
+    $first = $parts[0];
+    $last = $parts[1];
+  } else {
+    $first = "";
+    $last = $parts[0];
+  }
   $email = getWebUserEmail();
   $results = getLdapInfo($first,"",$last,$email,REMOTE_USER_NETID);
   $ldap_department = $results && array_key_exists("department",$results) ? $results["department"] : '';
@@ -91,9 +136,11 @@ function fixNameCase($rawname) {
 }
 
 function getWebUserName() {
-  if( array_key_exists("cn",$_SERVER) ) return fixNameCase($_SERVER["cn"]);
-  if( array_key_exists("givenName",$_SERVER) && array_key_exists("sn",$_SERVER) ) {
-    return fixNameCase($_SERVER["givenName"]) . " " . fixNameCase($_SERVER["sn"]);
+  if( REAL_REMOTE_USER_NETID == REMOTE_USER_NETID ) {
+    if( array_key_exists("cn",$_SERVER) ) return fixNameCase($_SERVER["cn"]);
+    if( array_key_exists("givenName",$_SERVER) && array_key_exists("sn",$_SERVER) ) {
+      return fixNameCase($_SERVER["givenName"]) . " " . fixNameCase($_SERVER["sn"]);
+    }
   }
   $person_info = getPersonInfo(REMOTE_USER_NETID);
   if( array_key_exists("NAME",$person_info) ) {
@@ -102,20 +149,47 @@ function getWebUserName() {
   if( array_key_exists("FIRST",$person_info) && array_key_exists("LAST",$person_info) ) {
     return $person_info["FIRST"] . " " . $person_info["LAST"];
   }
+
+  # look up a previous registration to find the name (convenient for act_as)
+  $dbh = connectDB();
+  $sql = "SELECT NAME FROM building_access WHERE NETID = :NETID ORDER BY ID DESC LIMIT 1";
+  $stmt = $dbh->prepare($sql);
+  $stmt->bindValue(":NETID",REMOTE_USER_NETID);
+  $stmt->execute();
+  $row = $stmt->fetch();
+  if( $row && $row["NAME"] ) {
+    return $row["NAME"];
+  }
+
   return REMOTE_USER_NETID;
 }
 
 function getWebUserEmail() {
-  if( array_key_exists("wiscEduMSOLPrimaryAddress",$_SERVER) ) {
-    return $_SERVER["wiscEduMSOLPrimaryAddress"];
+  if( REAL_REMOTE_USER_NETID == REMOTE_USER_NETID ) {
+    if( array_key_exists("wiscEduMSOLPrimaryAddress",$_SERVER) ) {
+      return $_SERVER["wiscEduMSOLPrimaryAddress"];
+    }
+    if( array_key_exists("mail",$_SERVER) ) {
+      return strtolower($_SERVER["mail"]);
+    }
   }
-  if( array_key_exists("mail",$_SERVER) ) {
-    return strtolower($_SERVER["mail"]);
-  }
+
   $person_info = getPersonInfo(REMOTE_USER_NETID);
   if( array_key_exists("EMAIL",$person_info) ) {
     return $person_info["EMAIL"];
   }
+
+  # look up a previous registration to find the email (convenient for act_as)
+  $dbh = connectDB();
+  $sql = "SELECT EMAIL FROM building_access WHERE NETID = :NETID ORDER BY ID DESC LIMIT 1";
+  $stmt = $dbh->prepare($sql);
+  $stmt->bindValue(":NETID",REMOTE_USER_NETID);
+  $stmt->execute();
+  $row = $stmt->fetch();
+  if( $row && $row["EMAIL"] ) {
+    return $row["EMAIL"];
+  }
+
   return REMOTE_USER_NETID . "@wisc.edu";
 }
 
@@ -766,7 +840,7 @@ function isVisible($netid,$room,$building,$department,$privacy) {
   if( $netid == REMOTE_USER_NETID ) {
     return true;
   }
-  if( in_array($department,getAdminDepartments()) ) {
+  if( in_array($department,getAdminDepartments()) && REAL_REMOTE_USER_NETID == REMOTE_USER_NETID ) {
     return true;
   }
   $privacy = resolvePrivacy($privacy);
