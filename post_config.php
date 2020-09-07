@@ -53,3 +53,7 @@ if( !defined('USER_SETTABLE_PRIVACY') ) {
   # default to false, so old database schema lacking PRIVACY column still works if the admin doesn't take action
   define('USER_SETTABLE_PRIVACY',false);
 }
+
+if( !defined('SHOW_ANONYMOUS_ROOM_OCCUPANCY') ) {
+  define('SHOW_ANONYMOUS_ROOM_OCCUPANCY',true);
+}

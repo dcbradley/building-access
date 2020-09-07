@@ -167,7 +167,15 @@ for( $hour=0; $hour < 24; $hour++ ) {
 
       if( !$organize_reservations_by_floor ) {
         if( !matchRoom($filter_room_regex,$rooms) ) continue;
-        $slotinfo .= "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . htmlescape($row["NAME"] . ": " . $building . " " . $row["ROOM"]) . "</span> ";
+
+        $show_room_occupancy = true;
+        if( !isVisible($row["NETID"],$row["ROOM"],$row["BUILDING"],$row["DEPARTMENT"],getPrivacy($row)) ) {
+          $occupant = "<i class='fas fa-shoe-prints'></i>";
+          $extra_info = $invisible_extra_info;
+          $show_room_occupancy = SHOW_ANONYMOUS_ROOM_OCCUPANCY;
+        }
+        if( !$show_room_occupancy ) continue;
+        $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . $occupant . htmlescape(" " . $building . " " . $row["ROOM"]) . "</span> ";
       } else {
         $floors_done = array();
         foreach( $rooms as $room ) {
@@ -183,11 +191,14 @@ for( $hour=0; $hour < 24; $hour++ ) {
 
           if( !matchRoom($filter_room_regex,$this_floor_rooms) ) continue;
           $this_floor_rooms = implode(",",$this_floor_rooms);
-	  $occupant = htmlescape($row["NAME"]) . " ";
-	  if( !isVisible($row["NETID"],$room,$row["BUILDING"],$row["DEPARTMENT"],getPrivacy($row)) ) {
-	    $occupant = "<i class='fas fa-shoe-prints'></i>";
-	    $extra_info = $invisible_extra_info;
-	  }
+          $occupant = htmlescape($row["NAME"]) . " ";
+          $show_room_occupancy = true;
+          if( !isVisible($row["NETID"],$room,$row["BUILDING"],$row["DEPARTMENT"],getPrivacy($row)) ) {
+            $occupant = "<i class='fas fa-shoe-prints'></i>";
+            $extra_info = $invisible_extra_info;
+            $show_room_occupancy = SHOW_ANONYMOUS_ROOM_OCCUPANCY;
+          }
+          if( !$show_room_occupancy ) continue;
           $this_slotinfo = "<span class='usage-entry $pending_approval' title='" . htmlescape($extra_info) . "'>$edit" . $occupant . htmlescape(" " . $building . " " . $this_floor_rooms) . "</span> ";
 
           if( !array_key_exists($floor,$slotinfo_floor) ) {

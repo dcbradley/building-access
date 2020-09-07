@@ -110,6 +110,10 @@ const DEFAULT_PRIVACY = false;
 # alter table building_access add column PRIVACY char(1) not null default '';
 const USER_SETTABLE_PRIVACY = false;
 
+# In the occupancy list, should rooms occupied by anonymous
+# people be listed?
+const SHOW_ANONYMOUS_ROOM_OCCUPANCY = true;
+
 # Optional function to rewrite rooms to canonical form.
 # This is useful if there is more than one name for a room.
 # Rewriting all the different names to one official name will allow room capacity policy to work.
