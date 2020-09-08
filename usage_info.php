@@ -49,13 +49,16 @@ if( $cur_day == "" ) {
 }
 $slot_minutes = array_key_exists('slot_minutes',$_REQUEST) ? $_REQUEST["slot_minutes"] : 60;
 $filter_room = array_key_exists('room',$_REQUEST) ? $_REQUEST["room"] : "";
-$filter_room = canonicalRoomList($filter_room,$building);
+$room_buildings = parseRoomBuildingList($filter_room,$department,$building);
 
 $filter_room_regex = "";
-foreach( preg_split("{ *, *}",$filter_room) as $room ) {
-  if( !$room ) continue;
+foreach( $room_buildings as $rb ) {
+  $r = $rb[0];
+  $b = $rb[1];
+  if( $b && !$building ) $building = $b;
+
   if( $filter_room_regex ) $filter_room_regex .= '|';
-  $filter_room_regex .= $room;
+  $filter_room_regex .= $r;
 }
 if( $filter_room_regex ) {
   $filter_room_regex = "{^(" . $filter_room_regex . ")}i";

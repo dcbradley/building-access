@@ -749,75 +749,55 @@ function saveRequest($show) {
   $stmt->bindValue(":PURPOSE",$purpose);
 
   $room = $_REQUEST["room"];
+  $selected_building = isset($_REQUEST["building"]) ? $_REQUEST["building"] : "";
 
-  $building_regex = getBuildingRegex();
-
-  $building_hint = "";
-  $offset = 0;
-  while(true) {
-    if( !preg_match("{(?:(?:^|,| )[a-zA-Z]?[0-9]+[a-zA-Z]?) +($building_regex)(?:$|,| )}i",$room,$match,PREG_OFFSET_CAPTURE,$offset) ) {
-      break;
+  $room_buildings = parseRoomBuildingList($room,$department,$selected_building);
+  $room_list = array();
+  $building = $selected_building;
+  $multiple_buildings = false;
+  foreach( $room_buildings as $rb ) {
+    $r = $rb[0];
+    if( !in_array($r,$room_list) ) {
+      $room_list[] = $r;
     }
-    $this_hint = $match[1][0];
-    $offset = $match[1][1] + strlen($this_hint);
-    $this_hint = canonicalBuildingName($this_hint);
-
-    if( $building_hint && $building_hint != $this_hint ) {
-      echo "<div class='alert alert-warning'>Only one building may be specified per registration.  It appears that rooms in both {$building_hint} and {$this_hint} are specified in this registration.  Please modify this request, splitting it into separate requests per building if necessary.</div>\n";
-      $building_hint = "";
-      $submission_errors = true;
-      break;
-    }
-    $building_hint = $this_hint;
-  }
-
-  if( !isset($_REQUEST["building"]) ) {
-    if( !$building_hint ) {
-      foreach( explode(",",$room) as $input_room ) {
-        $input_room = trim($input_room);
-        if( PARSE_ROOM_BUILDING($input_room,$department,$parsed_room,$this_building) ) {
-          if( $building_hint and $building_hint != $this_building ) {
-            $building_hint = "";
-            break;
-          }
-          $building_hint = $this_building;
-        }
-        else {
-          if( $building_hint ) {
-            $building_hint = "";
-            break;
-          }
-        }
+    $b = $rb[1];
+    if( $b ) {
+      if( !$building ) {
+        $building = $b;
+      }
+      else if( $building != $b ) {
+        echo "<div class='alert alert-warning'>Only one building may be specified per registration.  It appears that rooms in both ",htmlescape($building)," and ",htmlescape($b)," are specified in this registration.  Please modify this request, splitting it into separate requests per building if necessary.</div>\n";
+	$building = "";
+        $submission_errors = true;
+        $multiple_buildings = true;
+	break;
       }
     }
-    if( !$building_hint ) {
-      $building_hint = getDefaultBuilding($department);
-    }
-    $building = $building_hint;
-    if( !$building ) {
-      echo "<div class='alert alert-danger'>You must specify a building.</div>\n";
-      $submission_errors = true;
-    }
-  } else {
-    $building = canonicalBuildingName($_REQUEST["building"]);
-    if( !in_array($building,BUILDING_NAMES) ) {
-      echo "<div class='alert alert-danger'>Invalid building '",htmlescape($_REQUEST["building"]),"'</div>\n";
-      return; # this should not happen, so just bail out to avoid bad data
-    }
-    if( $building_hint && $building != $building_hint ) {
-      echo "<div class='alert alert-warning'>Only one building may be specified per request.  It appears that one of the rooms requested is in {$building_hint} while the request is for {$building}.  Please modify the request, splitting it into separate requests per building if necessary.</div>\n";
-      $continue_editing_this_request = true;
-      $submission_errors = true;
-    }
   }
-  $stmt->bindValue(":BUILDING",$building);
-
-  $room = canonicalRoomList($room,$building);
+  if( !$multiple_buildings ) {
+    $room = implode(", ",$room_list);
+  }
   if( !$room ) {
     echo "<div class='alert alert-danger'>You must specify a room.</div>\n";
     $submission_errors = true;
   }
   $stmt->bindValue(":ROOM",$room);
+
+  if( !$building ) $building = getDefaultBuilding($department);
+
+  if( !$building && !$multiple_buildings ) {
+    echo "<div class='alert alert-danger'>You must specify a building.</div>\n";
+    $submission_errors = true;
+  }
+
+  if( $building ) {
+    $building = canonicalBuildingName($building);
+    if( !in_array($building,BUILDING_NAMES) ) {
+      echo "<div class='alert alert-danger'>Invalid building '",htmlescape($building),"'</div>\n";
+      return; # this should not happen, so just bail out to avoid bad data
+    }
+  }
+  $stmt->bindValue(":BUILDING",$building);
 
   $stmt->bindValue(":START_TIME",$start_time);
   $stmt->bindValue(":END_TIME",$end_time);
@@ -979,8 +959,9 @@ function saveRequest($show) {
     }
   }
 
-  if( !$continue_editing_this_request ) {
-    clearRegistrationSubmitVars();
+  clearRegistrationSubmitVars();
+  if( $continue_editing_this_request ) {
+    $_REQUEST['id'] = $id;
   }
 }
 

@@ -52,7 +52,7 @@ function checkAutoApproval(&$why_not_approved,&$warnings,$id,&$request) {
       continue;
     }
     foreach( $rooms as $room ) {
-      $room = canonicalRoom($room);
+      $room = canonicalRoom($room,$request["BUILDING"]);
       $room_descr = $room . " " . buildingAbbreviation($request["BUILDING"]);
       foreach( $approval["ROOM"] as $room_building ) {
         if( ($room_building[0] == $room || $room_building[0] == "*") && ($room_building[1] == $request["BUILDING"] || !$room_building[1]) ) {

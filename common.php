@@ -209,38 +209,17 @@ function fileSafeName($unsafe) {
   return $result;
 }
 
-function canonicalRoomList($rooms,$building) {
-  $building_regex = getBuildingRegex();
-  # replace '1234 Ch' --> '1234'
-  do {
-    $rooms = preg_replace("{((?:^|,| )[a-zA-Z]?[0-9]+[a-zA-Z]?) +(?U:$building_regex)($|,| )}i","$1$2",$rooms,-1,$count);
-  } while( $count > 0 );
+function canonicalRoom($room,$building) {
+  $room = strtoupper(trim($room));
 
-  # insert commas if it appears the user only used spaces between room numbers
-  do {
-    $rooms = preg_replace("{((^|,| )[a-zA-Z]?[0-9]+[a-zA-Z]?) +([a-zA-Z]?[0-9]+[a-zA-Z]?($|,| ))}","$1, $3",$rooms,-1,$count);
-  } while( $count > 0 );
-  # replace ampersands with commas
-  $rooms = preg_replace("{&}",",",$rooms);
-
-  $rooms_array = array();
-  foreach( explode(",",$rooms) as $r ) {
-    $r = canonicalRoom($r);
-    # strip the word 'room' if it appears at the beginning
-    if( strncasecmp("room ",$r,5)==0 || strcasecmp("room",$r)==0 ) {
-      $r = trim(substr($r,4));
-    }
-    if( $r == "" ) continue;
-    if( function_exists('GET_CANONICAL_ROOM') ) {
-      $r = GET_CANONICAL_ROOM($r,$building);
-    }
-    $rooms_array[] = $r;
+  # strip the word 'room' if it appears at the beginning
+  if( strncasecmp("room ",$room,5)==0 || strcasecmp("room",$room)==0 ) {
+    $room = trim(substr($room,4));
   }
-  return implode(", ",$rooms_array);
-}
-
-function canonicalRoom($str) {
-  return strtoupper(trim($str));
+  if( $room && function_exists('GET_CANONICAL_ROOM') ) {
+    $room = GET_CANONICAL_ROOM($room,$building);
+  }
+  return $room;
 }
 
 function canonicalBuildingName($str) {
@@ -264,33 +243,45 @@ function getDefaultBuilding($department) {
   return UNKNOWN_DEPT_DEFAULT_BUILDING;
 }
 
-function parseRoomBuildingList($str,$department) {
-  $entries = explode(",",$str);
+function parseRoomBuildingList($rooms,$department,$selected_building="") {
+  $entries = explode(",",$rooms);
+
+  if( count($entries)==1 ) {
+    # insert commas if it appears the user only used spaces between room numbers
+    do {
+      $rooms = preg_replace("{((^|,| )[a-zA-Z]?[0-9]+[a-zA-Z]?) +([a-zA-Z]?[0-9]+[a-zA-Z]?($|,| ))}","$1, $3",$rooms,-1,$count);
+    } while( $count > 0 );
+
+    # replace ampersands with commas
+    $rooms = str_replace('&',',',$rooms);
+
+    $entries = explode(",",$rooms);
+  }
+
   $results = array();
   $building_regex = getBuildingRegex();
 
   foreach( $entries as $entry ) {
     $entry = trim($entry);
+    if( !$entry ) continue;
+    $building = $selected_building;
     $room = "";
-    $building = "";
     if( PARSE_ROOM_BUILDING($entry,$department,$room,$building) ) {
-      $results[] = array(canonicalRoom($room),canonicalBuildingName($building));
     }
-    else if( preg_match("{^(.*) +($building_regex)$}i",$entry,$match) ) {
-      $room = canonicalRoom($match[1]);
-      $building = canonicalBuildingName($match[2]);
-      $results[] = array($room,$building);
+    else if( preg_match("{^(.+) +($building_regex)$}i",$entry,$match) ) {
+      $room = $match[1];
+      $building = $match[2];
     }
-    else if( ($building=getDefaultBuilding($department)) ) {
-      $room = canonicalRoom($entry);
-      $building = canonicalBuildingName($building);
-      $results[] = array($room,$building);
+    else if( !$building && ($building=getDefaultBuilding($department)) ) {
+      $room = $entry;
     }
     else {
-      $room = canonicalRoom($entry);
-      $building = "";
-      $results[] = array($room,$building);
+      $room = $entry;
     }
+    $building = canonicalBuildingName($building);
+    $room = canonicalRoom($room,$building);
+    if( !$room ) continue;
+    $results[] = array($room,$building);
   }
   return $results;
 }
