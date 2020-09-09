@@ -581,6 +581,7 @@ function listFullWeekdayNames($day_chars) {
 
 function getEndOfMonth($date_str,$month_offset) {
   $dt = new DateTime($date_str);
+  $dt = new DateTime($dt->format('Y-m-01'));
   $dt->add(new DateInterval('P' . ($month_offset+1) . 'M'));
   $dt = new DateTime($dt->format('Y-m-01'));
   $dt->sub(new DateInterval('P1D'));
