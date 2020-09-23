@@ -16,11 +16,20 @@ function showData() {
   $prev_day = getPrevAllowedDay($cur_day,REGISTRATION_HOURS);
   $today = date("Y-m-d");
 
+  $search = isset($_REQUEST["search"]) ? $_REQUEST["search"] : "";
+  $search_sql = "";
+  if( $search ) {
+    $search_sql = "AND (NAME LIKE :SEARCH OR ROOM LIKE :SEARCH)";
+  }
+
   $dbh = connectDB();
-  $sql = "SELECT * FROM building_access WHERE START_TIME >= :START_TIME AND END_TIME < :END_TIME ORDER BY START_TIME DESC";
+  $sql = "SELECT * FROM building_access WHERE START_TIME >= :START_TIME AND END_TIME < :END_TIME {$search_sql} ORDER BY START_TIME DESC";
   $stmt = $dbh->prepare($sql);
   $stmt->bindValue(":START_TIME",$cur_day);
   $stmt->bindValue(":END_TIME",$end_day);
+  if( $search ) {
+    $stmt->bindValue(":SEARCH","%{$search}%");
+  }
   $stmt->execute();
 
   echo "<p>";
@@ -50,9 +59,10 @@ function showData() {
   echo "<button class='btn btn-primary' onclick='downloadCSV()'>Download</button>\n";
 
 
-  $display = ( $end_day == $next_day ) ? "style='display: none'" : "";
+  $display = ( $end_day == $next_day && $search == "" ) ? "style='display: none'" : "";
   echo "<form $display id='more_options' enctype='multipart/form-data' method='POST' autocomplete='off'>\n";
   echo "<input type='date' id='day' name='day' value='",htmlescape($cur_day),"'/> <input type='date' id='end' name='end' value='",htmlescape($end_day),"'/>\n";
+  echo "<input name='search' placeholder='Search' value='",htmlescape($search),"' size='10'/>\n";
   echo "<input type='submit' value='Go'/>\n";
   echo "</form>\n";
   echo "</p>\n";

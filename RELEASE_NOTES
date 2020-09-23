@@ -1,3 +1,5 @@
+* Added search box to data view.
+
 * Added SHOW_ANONYMOUS_ROOM_OCCUPANCY, which can be set to false
   to hide from the occupancy list rooms occupied by anonymous
   people.  Default true, which matches the previous behavior.
