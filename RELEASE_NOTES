@@ -1,3 +1,5 @@
+* Added option to specify arbitrary end date for repeating registrations.
+
 * Added search box to data view.
 
 * Added SHOW_ANONYMOUS_ROOM_OCCUPANCY, which can be set to false

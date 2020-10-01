@@ -57,3 +57,7 @@ if( !defined('USER_SETTABLE_PRIVACY') ) {
 if( !defined('SHOW_ANONYMOUS_ROOM_OCCUPANCY') ) {
   define('SHOW_ANONYMOUS_ROOM_OCCUPANCY',true);
 }
+
+if( !defined('REPEAT_HORIZON') ) {
+  define('REPEAT_HORIZON',30*5);
+}

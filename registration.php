@@ -196,21 +196,31 @@ function showRequestForm() {
 
   echo "<div class='field-title'>Repeat through</div><div class='field-input'>";
   $cur_month_name = date("F",strtotime($cur_day));
+  $repeat_found = false;
   for($month_offset=0; $month_offset<4; $month_offset++) {
     $end_of_month_date = getEndOfMonth($cur_day,$month_offset);
     $month_name = date("F",strtotime($end_of_month_date));
 
     if( $editing && $editing['REPEAT_THROUGH'] ) {
-      $checked = $month_name == date("F",strtotime($editing['REPEAT_THROUGH'])) ? "checked" : "";
+      $checked = $end_of_month_date == $editing['REPEAT_THROUGH'] ? "checked" : "";
     } else {
       $checked = $month_name == $cur_month_name ? "checked" : "";
     }
-    if( $checked ) defaultQueryParam('repeat_through',htmlescape($end_of_month_date));
+    if( $checked ) {
+      defaultQueryParam('repeat_through',htmlescape($end_of_month_date));
+      $repeat_found = true;
+    }
     if( array_key_exists('repeat_through',$_REQUEST) ) {
       $checked = $_REQUEST['repeat_through'] == htmlescape($end_of_month_date) ? "checked" : "";
     }
-    echo "<label style='margin-right: 1em;'><input type='radio' name='repeat_through' value='",htmlescape($end_of_month_date),"' $checked /> ",htmlescape($month_name),"</label>\n";
+    echo "<label style='margin-right: 1em;'><input type='radio' name='repeat_through' value='",htmlescape($end_of_month_date),"' $checked onchange='repeatThroughChanged()'/> ",htmlescape($month_name),"</label>\n";
   }
+  $checked = "";
+  if( $editing && $editing['REPEAT_THROUGH'] && !$repeat_found ) {
+    $checked = "checked";
+  }
+  echo "<label style='margin-right: 1em;'><input type='radio' name='repeat_through' id='repeat_through_other' value='other' $checked onchange='repeatThroughChanged()'/> other</label>\n";
+  echo "<input type='date' name='repeat_through_other_date' value='",htmlescape($editing ? $editing['REPEAT_THROUGH'] : ''),"'/>\n";
   echo "</div>\n";
   echo "</div>\n"; # end of repeat-options
 
@@ -321,6 +331,15 @@ function showRequestForm() {
   showOccupancyList();
 
   ?><script>
+
+    function repeatThroughChanged() {
+      if( document.getElementById('repeat_through_other').checked ) {
+        $("#registration_form input[name='repeat_through_other_date']").show();
+      } else {
+        $("#registration_form input[name='repeat_through_other_date']").hide();
+      }
+    }
+
     function showAdminOptions() {
       $('#admin_options').show();
       $('#admin_options_button').hide();
@@ -411,6 +430,7 @@ function showRequestForm() {
       } else {
         $(".repeat-options").hide();
       }
+      repeatThroughChanged();
     }
     window.addEventListener('load', function () {repeatChanged();});
     function validateInput(only_hide_errors=false) {
@@ -813,7 +833,23 @@ function saveRequest($show) {
       }
     }
     if( isset($_REQUEST['repeat_through']) ) {
-      $repeat_through = date("Y-m-d",strtotime($_REQUEST['repeat_through']));
+      $repeat_through = $_REQUEST['repeat_through'];
+      if( $repeat_through == "other" ) {
+        $repeat_through = $_REQUEST['repeat_through_other_date'];
+      }
+      if( $repeat_through ) {
+        $repeat_through = date("Y-m-d",strtotime($repeat_through));
+      }
+
+      if( $repeat_through && strtotime($repeat_through) - strtotime($start_time) > 3600*24*REPEAT_HORIZON ) {
+        echo "<div class='alert alert-danger'>The final date for repeating registrations cannot be more than ",REPEAT_HORIZON," days away.</div>\n";
+	$submission_errors = true;
+        if( $editing ) {
+          $repeat_through = $editing['REPEAT_THROUGH'];
+        } else {
+          $repeat_through = null;
+        }
+      }
     }
   }
 
