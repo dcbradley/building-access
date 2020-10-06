@@ -244,30 +244,44 @@ function conflictDesc($overlaps) {
 
 function getPeakOverlap($possible_overlaps,$start_time,$end_time,$people_already_counted) {
   $peak_overlaps = array();
-  foreach( $possible_overlaps as &$overlap1 ) {
-    if( array_key_exists($overlap1["NAME"],$people_already_counted) ) {
+
+  $time_boundaries = array();
+  foreach( $possible_overlaps as $overlap ) {
+    if( array_key_exists($overlap["NAME"],$people_already_counted) ) {
       continue;
     }
 
-    $start_time1 = max($start_time,$overlap1['START_TIME']);
-    $end_time1 = min($end_time,$overlap1['END_TIME']);
-    $other_possible_overlaps = array();
-    foreach( $possible_overlaps as &$overlap2 ) {
-      if( $overlap1 == $overlap2 ) continue;
-      if( $overlap2['START_TIME'] < $end_time1 && $overlap2['END_TIME'] > $start_time1 ) {
-        $other_possible_overlaps[] = $overlap2;
+    $start_time1 = max($start_time,$overlap['START_TIME']);
+    $end_time1 = min($end_time,$overlap['END_TIME']);
+
+    $time_boundaries[$start_time1] = 1;
+    $time_boundaries[$end_time1] = 1;
+  }
+
+  ksort($time_boundaries);
+
+  foreach( $time_boundaries as $time_boundary => $value ) {
+    $overlaps = array();
+    $this_time_people_already_counted = array_merge($people_already_counted);
+    foreach( $possible_overlaps as $overlap ) {
+      if( array_key_exists($overlap["NAME"],$this_time_people_already_counted) ) {
+        continue;
+      }
+      if( $overlap['START_TIME'] <= $time_boundary && $overlap['END_TIME'] > $time_boundary ) {
+        $overlaps[] = $overlap;
+        $this_time_people_already_counted[$overlap["NAME"]] = 1;
       }
     }
-    $people_already_counted[$overlap1["NAME"]] = 1;
-    $overlaps = getPeakOverlap($other_possible_overlaps,$start_time1,$end_time1,$people_already_counted);
-    unset($people_already_counted[$overlap1["NAME"]]);
-    if( count($overlaps)+1 > count($peak_overlaps) ) {
-      $peak_overlaps = array($overlap1);
-      foreach( $overlaps as $overlap ) {
-        $peak_overlaps[] = $overlap;
+
+    if( count($overlaps) > count($peak_overlaps) ) {
+      $peak_overlaps = $overlaps;
+      if( count($peak_overlaps) == count($possible_overlaps) ) {
+        # can't get any bigger, so stop searching
+        break;
       }
     }
   }
+
   return $peak_overlaps;
 }
 
