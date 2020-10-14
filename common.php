@@ -398,9 +398,9 @@ function getRoomCap($room,$building) {
 
   if( $roomcaps && array_key_exists($room,$roomcaps) ) {
     $roomcap = $roomcaps[$room];
-    $normcap = (int)$roomcap['NORMCAP'];
     $maxcap = (int)$roomcap['MAXCAP'];
-    $description = $roomcap['DESCRIPTION'];
+    $normcap = array_key_exists('NORMCAP',$roomcap) && $roomcap['NORMCAP'] != "" ? (int)$roomcap['NORMCAP'] : 1;
+    $description = array_key_exists('DESCRIPTION',$roomcap) ? $roomcap['DESCRIPTION'] : "";
   }
 
   return array($normcap,$maxcap,$description);

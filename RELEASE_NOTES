@@ -1,3 +1,6 @@
+* In the roomcaps CSV file, NORMCAP and DESCRIPTION columns are now
+  optional as had been previously documented.
+
 * Added option to specify arbitrary end date for repeating registrations.
 
 * Added search box to data view.
