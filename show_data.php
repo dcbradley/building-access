@@ -77,8 +77,8 @@ function showData() {
   }
   </script><?php
 
-  $date_col = ( $end_day == $next_day ) ? "" : "<th " . SORTABLE_COLUMN . ">Date</th>";
-  echo "<table class='records'><thead><tr>{$date_col}<th ",SORTABLE_COLUMN,">Start</th><th ",SORTABLE_COLUMN,">End</th><th ",SORTABLE_COLUMN,">Approved</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Department</th><th ",SORTABLE_COLUMN,">Purpose</th></tr></thead><tbody>\n";
+  $date_col = ( $end_day == $next_day ) ? "" : "<th>Date</th>";
+  echo "<table class='records clicksort'><thead><tr>{$date_col}<th>Start</th><th>End</th><th>Approved</th><th>Who</th><th>Room</th><th>Building</th><th>Department</th><th>Purpose</th></tr></thead><tbody>\n";
   while( ($row=$stmt->fetch()) ) {
     echo "<tr class='record'>";
     $id = $row["ID"];

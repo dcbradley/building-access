@@ -1,7 +1,5 @@
 <?php
 
-const SORTABLE_COLUMN = "class='clicksort' onClick='sortTable(this,this.cellIndex+1,1)'";
-
 if( !defined('SELF_FULL_URL') ) {
   define('SELF_FULL_URL',"https://" . $_SERVER["SERVER_NAME"] . str_replace("/index.php","/",$_SERVER["PHP_SELF"]));
 }

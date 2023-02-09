@@ -37,7 +37,7 @@ function showPendingRequests() {
   echo "<table class='records'><thead><tr>";
   echo "<th><small>Aprv</small><br><input type='checkbox' name='approve_all' id='approve_all' onchange='approveAllChanged()'/></th>";
   echo "<th><small>Deny</small><br><input type='checkbox' name='deny_all' id='deny_all' onchange='denyAllChanged()'/></th>";
-  echo "<th ",SORTABLE_COLUMN,">Time</th><th ",SORTABLE_COLUMN,">Who</th><th ",SORTABLE_COLUMN,">Room</th><th ",SORTABLE_COLUMN,">Building</th><th ",SORTABLE_COLUMN,">Purpose</th><th ",SORTABLE_COLUMN,">Conflict</th></tr></thead><tbody>\n";
+  echo "<th class='clicksort'>Time</th><th class='clicksort'>Who</th><th class='clicksort'>Room</th><th class='clicksort'>Building</th><th class='clicksort'>Purpose</th><th class='clicksort'>Conflict</th></tr></thead><tbody>\n";
   while( ($row=$stmt->fetch()) ) {
     $approval_row_count += 1;
     $why_not_approved = array();
