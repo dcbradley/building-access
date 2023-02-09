@@ -48,25 +48,11 @@ function showSafetyMonitors() {
   }
   </script><?php
 
-  showSafetyMonitorsForDates($start_date,$end_date);
-
-}
-
-function showSafetyMonitorsForDates($start_date,$end_date,$title=null) {
   $dbh = connectDB();
-  $sql = "SELECT ID,NAME,NETID,START_TIME,END_TIME,ROOM,BUILDING,EMAIL,DEPARTMENT FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND SAFETY_MONITOR = 'Y' ORDER BY START_TIME,NAME";
+  $sql = "SELECT ID,NAME,NETID,START_TIME,END_TIME,ROOM,BUILDING,EMAIL FROM building_access WHERE START_TIME < :END_TIME AND END_TIME > :START_TIME AND SAFETY_MONITOR = 'Y' ORDER BY START_TIME,NAME";
   $stmt = $dbh->prepare($sql);
 
-  $today = date("Y-m-d");
-  $eligible_safety_monitor = eligibleSafetyMonitor(REMOTE_USER_NETID,getUserDepartment());
-
-  $add_spacer = false;
   for( $cur_day=$start_date; $cur_day<$end_date; $cur_day=getNextDay($cur_day) ) {
-
-    if( $add_spacer ) {
-      $add_spacer = false;
-      echo "<div style='padding-top: 0.5em;'></div>\n";
-    }
 
     $day_header_printed = false;
     $day_char = getDayChar($cur_day);
@@ -80,7 +66,6 @@ function showSafetyMonitorsForDates($start_date,$end_date,$title=null) {
         $day_header_printed = true;
         echo "<div class='card'><div class='card-body'>\n";
         $day_desc = date("l, M d",strtotime($cur_day));
-	if( $title ) $day_desc = $title;
         echo "<h5 class='card-title'>",htmlescape($day_desc),"</h5>\n";
       }
 
@@ -94,28 +79,27 @@ function showSafetyMonitorsForDates($start_date,$end_date,$title=null) {
       $stmt->execute();
       $signed_up = false;
       while( ($row=$stmt->fetch()) ) {
-        echo "<div class='safety-monitor-row'>";
         $timerange = date("g:ia",strtotime($row["START_TIME"])) . " - " . date("g:ia",strtotime($row["END_TIME"]));
 	if( $row["NETID"] == REMOTE_USER_NETID ) {
           echo "<a href='?id=" . htmlescape($row["ID"]) . "'><i class='far fa-edit'></i></a>";
 	  $signed_up = true;
 	}
-	$person_info = getPersonInfo($row["NETID"],$row["NAME"],$row["EMAIL"],$row["DEPARTMENT"]);
-	$url = array_key_exists("URL",$person_info) ? $person_info["URL"] : "";
+	$person_info = getPersonContactInfo($row["NETID"],$row["NAME"],$row["EMAIL"]);
+	$url = array_key_exists("url",$person_info) ? $person_info["url"] : "";
 	if( $url ) {
           echo "<a href='",htmlescape($url),"'>";
 	}
-	echo "<span style='white-space: nowrap'>",htmlescape($row["NAME"]),"</span>";
+	echo htmlescape($row["NAME"]);
 	if( $url ) {
 	  echo "</a>";
 	}
-	echo " <span style='white-space: nowrap'>",htmlescape($timerange),"</span> &nbsp;&nbsp;<span style='white-space: nowrap'>",htmlescape($row["BUILDING"])," ",htmlescape($row["ROOM"]),"</span>";
-	if( array_key_exists("PHONE",$person_info) ) {
-	  echo " &nbsp;&nbsp;",htmlescape($person_info["PHONE"]);
+	echo " ",htmlescape($timerange)," ",htmlescape($row["BUILDING"])," ",htmlescape($row["ROOM"]);
+	if( array_key_exists("phone",$person_info) ) {
+	  echo " &nbsp;&nbsp;",htmlescape($person_info["phone"]);
 	}
-	echo "</div>\n";
+	echo "<br>\n";
       }
-      if( !$signed_up && $cur_day >= $today && $eligible_safety_monitor ) {
+      if( !$signed_up && $cur_day >= $today ) {
         echo "<form action='",SELF_FULL_URL,"' enctype='multipart/form-data' method='POST' onsubmit='return validateInput();'>\n";
 	echo "<input type='hidden' name='day' value='$cur_day'/>\n";
 	echo "<input type='hidden' name='start_time' value='$start_time'/>\n";
@@ -130,20 +114,7 @@ function showSafetyMonitorsForDates($start_date,$end_date,$title=null) {
     }
     if( $day_char == 'S' ) {
       # end of week spacer
-      $add_spacer = true;
+      echo "<div style='padding-top: 0.5em;'></div>\n";
     }
   }
-}
-
-function eligibleSafetyMonitor($netid,$department) {
-  $person_info = getPersonInfo($netid,getWebUserName(),getWebUserEmail(),$department);
-  if( array_key_exists("SAFETY_MONITOR",$person_info) ) {
-    return $person_info["SAFETY_MONITOR"] == "Y";
-  }
-  return false;
-}
-
-function showSafetyMonitorsForDate($date) {
-  if( !SAFETY_MONITOR_SIGNUP ) return;
-  showSafetyMonitorsForDates($date,getNextDay($date),"Safety Monitors");
 }
