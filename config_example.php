@@ -154,10 +154,7 @@ const REQUEST_FORM_HEADER = "
   href='https://hr.wisc.edu/covid19/workplace-training/'>COVID-19 Safety Training</a>.  See
   also <a href='ResearchRestartPIMessage.pdf'>L&amp;S Research Restart
   Message</a> and <a href='BuildingGuidelines.pdf'>Guidelines for
-  working in Chamberlin and Sterling Hall</a>.  There is also a <a
-  href='https://dataviz.wisc.edu/#/views/Student-InstructorBuildingDensityTool_15959408660590/StudentInstructorDensityCalculations?:iid=1'
-  >density map</a> for instructional activities that may be
-  helpful.</p> ";
+  working in Chamberlin and Sterling Hall</a>.</p> ";
 
 const SUCCESS_REGISTRATION_MSG = "Recommended entrances, exits, stairwells, bathrooms, and other notes may be found in <a href='BuildingGuidelines.pdf'>Guidelines for working in Chamberlin and Sterling Hall</a>. If you feel unwell, <em>do not</em> enter the building.";
 

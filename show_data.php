@@ -82,12 +82,12 @@ function showData() {
   while( ($row=$stmt->fetch()) ) {
     echo "<tr class='record'>";
     $id = $row["ID"];
-    $sortdata = "<span class='sort_data'>" . date("Y-m-d H:i",strtotime($row["START_TIME"])) . "</span>";
+    $sortdata = "<span class='clicksort_data'>" . date("Y-m-d H:i",strtotime($row["START_TIME"])) . "</span>";
     if( $end_day != $next_day ) {
       echo "<td>",date('m/j',strtotime($row['START_TIME'])),"\n",$sortdata,"</td>";
     }
     echo "<td>",htmlescape(date("H:i",strtotime($row["START_TIME"]))),"\n",$sortdata,"</td>";
-    $sortdata = "<span class='sort_data'>" . date("Y-m-d H:i",strtotime($row["END_TIME"])) . "</span>";
+    $sortdata = "<span class='clicksort_data'>" . date("Y-m-d H:i",strtotime($row["END_TIME"])) . "</span>";
     echo "<td>",htmlescape(date("H:i",strtotime($row["END_TIME"]))),"\n",$sortdata,"</td>";
 
     $approved = $row["APPROVED"];

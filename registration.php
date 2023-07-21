@@ -1180,7 +1180,7 @@ function requestApproval($show) {
   $headers = implode("\r\n",$headers);
 
   $to = DEPT_ADMIN_EMAILS[$request['DEPARTMENT']];
-  mail($to,$subject,$msg,$headers);
+  mail($to,$subject,$msg,$headers,"-f " . FROM_EMAIL);
 
   $sql = "UPDATE building_access SET APPROVED = :APPROVED WHERE ID = :ID";
   $stmt = $dbh->prepare($sql);

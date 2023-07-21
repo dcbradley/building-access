@@ -57,7 +57,7 @@ function showPendingRequests() {
     echo "<td><input type='checkbox' class='deny_checkbox' value='1' name='deny_$id' id='deny_$id' $checked onchange='denyChanged($id)'/>";
     echo "<br><input style='display: none' type='text' class='deny_reason' size='15' name='deny_reason_$id' id='deny_reason_$id' placeholder='reason'/></td>";
     $timerange = date("D m/d H:i",strtotime($row["START_TIME"])) . " - " . date("H:i",strtotime($row["END_TIME"]));
-    $sortdata = "<span class='sort_data'>" . date("Y-m-d H:i",strtotime($row["START_TIME"])) . "</span>";
+    $sortdata = "<span class='clicksort_data'>" . date("Y-m-d H:i",strtotime($row["START_TIME"])) . "</span>";
     echo "<td>",htmlescape($timerange),"\n",$sortdata,"</td>";
 
     echo "<td><a href='mailto:",htmlescape($row["EMAIL"]),"'>",htmlescape($row["NAME"]),"</a></td>";
@@ -283,7 +283,7 @@ function notifyOfApprovalStatus($id) {
   $headers = implode("\r\n",$headers);
 
   $to = $request['EMAIL'];
-  mail($to,$subject,$msg,$headers);
+  mail($to,$subject,$msg,$headers,"-f " . FROM_EMAIL);
 }
 
 function warnAlreadyApprovedOrDenied($id,$attempted_action) {

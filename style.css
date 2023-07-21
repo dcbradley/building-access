@@ -86,8 +86,6 @@ table.records { border-collapse: collapse; }
 .records, .records th, .records td { border: 1px solid black; }
 table.records tr.record:nth-child(odd) { background-color: #E0E0E0; }
 table.records tr.record:nth-child(even) { background-color: #FFFFFF; }
-.clicksort { cursor: pointer; }
-.clicksort.sorting { cursor: progress; }
 .centered {
     text-align: center;
 }
@@ -117,10 +115,6 @@ table.records tr.record:nth-child(even) { background-color: #FFFFFF; }
     display: block;
     margin-top: 0;
     padding-top: 0;
-}
-
-.sort_data {
-    display: none;
 }
 
 textarea {

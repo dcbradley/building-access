@@ -1,0 +1,3 @@
+th.clicksort,td.clicksort { cursor: pointer; }
+.clicksort.sorting { cursor: progress; }
+.clicksort_data {display: none;}
